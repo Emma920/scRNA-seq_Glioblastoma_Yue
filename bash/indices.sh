@@ -1,0 +1,1 @@
+STAR --runThreadN 40 --runMode genomeGenerate --genomeDir /root/Desktop/workspace/ssd/yue/indices --genomeFastaFiles /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.99.gtf

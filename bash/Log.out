@@ -1,0 +1,634 @@
+STAR version=2.7.9a
+STAR compilation time,server,dir=2021-05-04T09:43:56-0400 vega:/home/dobin/data/STAR/STARcode/STAR.master/source
+##### Command Line:
+STAR --runThreadN 40 --runMode genomeGenerate --genomeDir /root/Desktop/workspace/ssd/yue/indices --genomeFastaFiles /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.99.gtf
+##### Initial USER parameters from Command Line:
+###### All USER parameters from Command Line:
+runThreadN                    40     ~RE-DEFINED
+runMode                       genomeGenerate        ~RE-DEFINED
+genomeDir                     /root/Desktop/workspace/ssd/yue/indices     ~RE-DEFINED
+genomeFastaFiles              /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa        ~RE-DEFINED
+sjdbGTFfile                   /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.99.gtf     ~RE-DEFINED
+##### Finished reading parameters from all sources
+
+##### Final user re-defined parameters-----------------:
+runMode                           genomeGenerate   
+runThreadN                        40
+genomeDir                         /root/Desktop/workspace/ssd/yue/indices
+genomeFastaFiles                  /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa   
+sjdbGTFfile                       /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.99.gtf
+
+-------------------------------
+##### Final effective command line:
+STAR   --runMode genomeGenerate      --runThreadN 40   --genomeDir /root/Desktop/workspace/ssd/yue/indices   --genomeFastaFiles /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa      --sjdbGTFfile /root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.99.gtf
+----------------------------------------
+
+Number of fastq files for each mate = 1
+ParametersSolo: --soloCellFilterType CellRanger2.2 filtering parameters:  3000 0.99 10
+Finished loading and checking parameters
+--genomeDir directory exists and will be overwritten: /root/Desktop/workspace/ssd/yue/indices/
+!!!!! WARNING: Could not move Log.out file from ./Log.out into /root/Desktop/workspace/ssd/yue/indices/Log.out. Will keep ./Log.out
+
+Nov 14 12:13:49 ... starting to generate Genome files
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 0  "1" chrStart: 0
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 1  "10" chrStart: 249036800
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 2  "11" chrStart: 382992384
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 3  "12" chrStart: 518258688
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 4  "13" chrStart: 651689984
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 5  "14" chrStart: 766246912
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 6  "15" chrStart: 873463808
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 7  "16" chrStart: 975699968
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 8  "17" chrStart: 1066139648
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 9  "18" chrStart: 1149501440
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 10  "19" chrStart: 1229979648
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 11  "2" chrStart: 1288699904
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 12  "20" chrStart: 1530920960
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 13  "21" chrStart: 1595408384
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 14  "22" chrStart: 1642332160
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 15  "3" chrStart: 1693188096
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 16  "4" chrStart: 1891631104
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 17  "5" chrStart: 2081947648
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 18  "6" chrStart: 2263613440
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 19  "7" chrStart: 2434531328
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 20  "8" chrStart: 2593914880
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 21  "9" chrStart: 2739142656
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 22  "MT" chrStart: 2877554688
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 23  "X" chrStart: 2877816832
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 24  "Y" chrStart: 3034054656
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 25  "KI270728.1" chrStart: 3091464192
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 26  "KI270727.1" chrStart: 3093561344
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 27  "KI270442.1" chrStart: 3094085632
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 28  "KI270729.1" chrStart: 3094609920
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 29  "GL000225.1" chrStart: 3095134208
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 30  "KI270743.1" chrStart: 3095396352
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 31  "GL000008.2" chrStart: 3095658496
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 32  "GL000009.2" chrStart: 3095920640
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 33  "KI270747.1" chrStart: 3096182784
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 34  "KI270722.1" chrStart: 3096444928
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 35  "GL000194.1" chrStart: 3096707072
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 36  "KI270742.1" chrStart: 3096969216
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 37  "GL000205.2" chrStart: 3097231360
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 38  "GL000195.1" chrStart: 3097493504
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 39  "KI270736.1" chrStart: 3097755648
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 40  "KI270733.1" chrStart: 3098017792
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 41  "GL000224.1" chrStart: 3098279936
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 42  "GL000219.1" chrStart: 3098542080
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 43  "KI270719.1" chrStart: 3098804224
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 44  "GL000216.2" chrStart: 3099066368
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 45  "KI270712.1" chrStart: 3099328512
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 46  "KI270706.1" chrStart: 3099590656
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 47  "KI270725.1" chrStart: 3099852800
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 48  "KI270744.1" chrStart: 3100114944
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 49  "KI270734.1" chrStart: 3100377088
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 50  "GL000213.1" chrStart: 3100639232
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 51  "GL000220.1" chrStart: 3100901376
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 52  "KI270715.1" chrStart: 3101163520
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 53  "GL000218.1" chrStart: 3101425664
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 54  "KI270749.1" chrStart: 3101687808
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 55  "KI270741.1" chrStart: 3101949952
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 56  "GL000221.1" chrStart: 3102212096
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 57  "KI270716.1" chrStart: 3102474240
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 58  "KI270731.1" chrStart: 3102736384
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 59  "KI270751.1" chrStart: 3102998528
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 60  "KI270750.1" chrStart: 3103260672
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 61  "KI270519.1" chrStart: 3103522816
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 62  "GL000214.1" chrStart: 3103784960
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 63  "KI270708.1" chrStart: 3104047104
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 64  "KI270730.1" chrStart: 3104309248
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 65  "KI270438.1" chrStart: 3104571392
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 66  "KI270737.1" chrStart: 3104833536
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 67  "KI270721.1" chrStart: 3105095680
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 68  "KI270738.1" chrStart: 3105357824
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 69  "KI270748.1" chrStart: 3105619968
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 70  "KI270435.1" chrStart: 3105882112
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 71  "GL000208.1" chrStart: 3106144256
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 72  "KI270538.1" chrStart: 3106406400
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 73  "KI270756.1" chrStart: 3106668544
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 74  "KI270739.1" chrStart: 3106930688
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 75  "KI270757.1" chrStart: 3107192832
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 76  "KI270709.1" chrStart: 3107454976
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 77  "KI270746.1" chrStart: 3107717120
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 78  "KI270753.1" chrStart: 3107979264
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 79  "KI270589.1" chrStart: 3108241408
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 80  "KI270726.1" chrStart: 3108503552
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 81  "KI270735.1" chrStart: 3108765696
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 82  "KI270711.1" chrStart: 3109027840
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 83  "KI270745.1" chrStart: 3109289984
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 84  "KI270714.1" chrStart: 3109552128
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 85  "KI270732.1" chrStart: 3109814272
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 86  "KI270713.1" chrStart: 3110076416
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 87  "KI270754.1" chrStart: 3110338560
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 88  "KI270710.1" chrStart: 3110600704
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 89  "KI270717.1" chrStart: 3110862848
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 90  "KI270724.1" chrStart: 3111124992
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 91  "KI270720.1" chrStart: 3111387136
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 92  "KI270723.1" chrStart: 3111649280
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 93  "KI270718.1" chrStart: 3111911424
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 94  "KI270317.1" chrStart: 3112173568
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 95  "KI270740.1" chrStart: 3112435712
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 96  "KI270755.1" chrStart: 3112697856
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 97  "KI270707.1" chrStart: 3112960000
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 98  "KI270579.1" chrStart: 3113222144
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 99  "KI270752.1" chrStart: 3113484288
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 100  "KI270512.1" chrStart: 3113746432
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 101  "KI270322.1" chrStart: 3114008576
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 102  "GL000226.1" chrStart: 3114270720
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 103  "KI270311.1" chrStart: 3114532864
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 104  "KI270366.1" chrStart: 3114795008
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 105  "KI270511.1" chrStart: 3115057152
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 106  "KI270448.1" chrStart: 3115319296
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 107  "KI270521.1" chrStart: 3115581440
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 108  "KI270581.1" chrStart: 3115843584
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 109  "KI270582.1" chrStart: 3116105728
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 110  "KI270515.1" chrStart: 3116367872
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 111  "KI270588.1" chrStart: 3116630016
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 112  "KI270591.1" chrStart: 3116892160
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 113  "KI270522.1" chrStart: 3117154304
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 114  "KI270507.1" chrStart: 3117416448
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 115  "KI270590.1" chrStart: 3117678592
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 116  "KI270584.1" chrStart: 3117940736
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 117  "KI270320.1" chrStart: 3118202880
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 118  "KI270382.1" chrStart: 3118465024
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 119  "KI270468.1" chrStart: 3118727168
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 120  "KI270467.1" chrStart: 3118989312
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 121  "KI270362.1" chrStart: 3119251456
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 122  "KI270517.1" chrStart: 3119513600
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 123  "KI270593.1" chrStart: 3119775744
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 124  "KI270528.1" chrStart: 3120037888
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 125  "KI270587.1" chrStart: 3120300032
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 126  "KI270364.1" chrStart: 3120562176
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 127  "KI270371.1" chrStart: 3120824320
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 128  "KI270333.1" chrStart: 3121086464
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 129  "KI270374.1" chrStart: 3121348608
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 130  "KI270411.1" chrStart: 3121610752
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 131  "KI270414.1" chrStart: 3121872896
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 132  "KI270510.1" chrStart: 3122135040
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 133  "KI270390.1" chrStart: 3122397184
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 134  "KI270375.1" chrStart: 3122659328
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 135  "KI270420.1" chrStart: 3122921472
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 136  "KI270509.1" chrStart: 3123183616
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 137  "KI270315.1" chrStart: 3123445760
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 138  "KI270302.1" chrStart: 3123707904
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 139  "KI270518.1" chrStart: 3123970048
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 140  "KI270530.1" chrStart: 3124232192
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 141  "KI270304.1" chrStart: 3124494336
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 142  "KI270418.1" chrStart: 3124756480
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 143  "KI270424.1" chrStart: 3125018624
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 144  "KI270417.1" chrStart: 3125280768
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 145  "KI270508.1" chrStart: 3125542912
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 146  "KI270303.1" chrStart: 3125805056
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 147  "KI270381.1" chrStart: 3126067200
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 148  "KI270529.1" chrStart: 3126329344
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 149  "KI270425.1" chrStart: 3126591488
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 150  "KI270396.1" chrStart: 3126853632
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 151  "KI270363.1" chrStart: 3127115776
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 152  "KI270386.1" chrStart: 3127377920
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 153  "KI270465.1" chrStart: 3127640064
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 154  "KI270383.1" chrStart: 3127902208
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 155  "KI270384.1" chrStart: 3128164352
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 156  "KI270330.1" chrStart: 3128426496
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 157  "KI270372.1" chrStart: 3128688640
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 158  "KI270548.1" chrStart: 3128950784
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 159  "KI270580.1" chrStart: 3129212928
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 160  "KI270387.1" chrStart: 3129475072
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 161  "KI270391.1" chrStart: 3129737216
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 162  "KI270305.1" chrStart: 3129999360
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 163  "KI270373.1" chrStart: 3130261504
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 164  "KI270422.1" chrStart: 3130523648
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 165  "KI270316.1" chrStart: 3130785792
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 166  "KI270340.1" chrStart: 3131047936
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 167  "KI270338.1" chrStart: 3131310080
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 168  "KI270583.1" chrStart: 3131572224
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 169  "KI270334.1" chrStart: 3131834368
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 170  "KI270429.1" chrStart: 3132096512
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 171  "KI270393.1" chrStart: 3132358656
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 172  "KI270516.1" chrStart: 3132620800
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 173  "KI270389.1" chrStart: 3132882944
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 174  "KI270466.1" chrStart: 3133145088
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 175  "KI270388.1" chrStart: 3133407232
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 176  "KI270544.1" chrStart: 3133669376
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 177  "KI270310.1" chrStart: 3133931520
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 178  "KI270412.1" chrStart: 3134193664
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 179  "KI270395.1" chrStart: 3134455808
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 180  "KI270376.1" chrStart: 3134717952
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 181  "KI270337.1" chrStart: 3134980096
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 182  "KI270335.1" chrStart: 3135242240
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 183  "KI270378.1" chrStart: 3135504384
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 184  "KI270379.1" chrStart: 3135766528
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 185  "KI270329.1" chrStart: 3136028672
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 186  "KI270419.1" chrStart: 3136290816
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 187  "KI270336.1" chrStart: 3136552960
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 188  "KI270312.1" chrStart: 3136815104
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 189  "KI270539.1" chrStart: 3137077248
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 190  "KI270385.1" chrStart: 3137339392
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 191  "KI270423.1" chrStart: 3137601536
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 192  "KI270392.1" chrStart: 3137863680
+/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 193  "KI270394.1" chrStart: 3138125824
+Chromosome sequence lengths: 
+1	248956422
+10	133797422
+11	135086622
+12	133275309
+13	114364328
+14	107043718
+15	101991189
+16	90338345
+17	83257441
+18	80373285
+19	58617616
+2	242193529
+20	64444167
+21	46709983
+22	50818468
+3	198295559
+4	190214555
+5	181538259
+6	170805979
+7	159345973
+8	145138636
+9	138394717
+MT	16569
+X	156040895
+Y	57227415
+KI270728.1	1872759
+KI270727.1	448248
+KI270442.1	392061
+KI270729.1	280839
+GL000225.1	211173
+KI270743.1	210658
+GL000008.2	209709
+GL000009.2	201709
+KI270747.1	198735
+KI270722.1	194050
+GL000194.1	191469
+KI270742.1	186739
+GL000205.2	185591
+GL000195.1	182896
+KI270736.1	181920
+KI270733.1	179772
+GL000224.1	179693
+GL000219.1	179198
+KI270719.1	176845
+GL000216.2	176608
+KI270712.1	176043
+KI270706.1	175055
+KI270725.1	172810
+KI270744.1	168472
+KI270734.1	165050
+GL000213.1	164239
+GL000220.1	161802
+KI270715.1	161471
+GL000218.1	161147
+KI270749.1	158759
+KI270741.1	157432
+GL000221.1	155397
+KI270716.1	153799
+KI270731.1	150754
+KI270751.1	150742
+KI270750.1	148850
+KI270519.1	138126
+GL000214.1	137718
+KI270708.1	127682
+KI270730.1	112551
+KI270438.1	112505
+KI270737.1	103838
+KI270721.1	100316
+KI270738.1	99375
+KI270748.1	93321
+KI270435.1	92983
+GL000208.1	92689
+KI270538.1	91309
+KI270756.1	79590
+KI270739.1	73985
+KI270757.1	71251
+KI270709.1	66860
+KI270746.1	66486
+KI270753.1	62944
+KI270589.1	44474
+KI270726.1	43739
+KI270735.1	42811
+KI270711.1	42210
+KI270745.1	41891
+KI270714.1	41717
+KI270732.1	41543
+KI270713.1	40745
+KI270754.1	40191
+KI270710.1	40176
+KI270717.1	40062
+KI270724.1	39555
+KI270720.1	39050
+KI270723.1	38115
+KI270718.1	38054
+KI270317.1	37690
+KI270740.1	37240
+KI270755.1	36723
+KI270707.1	32032
+KI270579.1	31033
+KI270752.1	27745
+KI270512.1	22689
+KI270322.1	21476
+GL000226.1	15008
+KI270311.1	12399
+KI270366.1	8320
+KI270511.1	8127
+KI270448.1	7992
+KI270521.1	7642
+KI270581.1	7046
+KI270582.1	6504
+KI270515.1	6361
+KI270588.1	6158
+KI270591.1	5796
+KI270522.1	5674
+KI270507.1	5353
+KI270590.1	4685
+KI270584.1	4513
+KI270320.1	4416
+KI270382.1	4215
+KI270468.1	4055
+KI270467.1	3920
+KI270362.1	3530
+KI270517.1	3253
+KI270593.1	3041
+KI270528.1	2983
+KI270587.1	2969
+KI270364.1	2855
+KI270371.1	2805
+KI270333.1	2699
+KI270374.1	2656
+KI270411.1	2646
+KI270414.1	2489
+KI270510.1	2415
+KI270390.1	2387
+KI270375.1	2378
+KI270420.1	2321
+KI270509.1	2318
+KI270315.1	2276
+KI270302.1	2274
+KI270518.1	2186
+KI270530.1	2168
+KI270304.1	2165
+KI270418.1	2145
+KI270424.1	2140
+KI270417.1	2043
+KI270508.1	1951
+KI270303.1	1942
+KI270381.1	1930
+KI270529.1	1899
+KI270425.1	1884
+KI270396.1	1880
+KI270363.1	1803
+KI270386.1	1788
+KI270465.1	1774
+KI270383.1	1750
+KI270384.1	1658
+KI270330.1	1652
+KI270372.1	1650
+KI270548.1	1599
+KI270580.1	1553
+KI270387.1	1537
+KI270391.1	1484
+KI270305.1	1472
+KI270373.1	1451
+KI270422.1	1445
+KI270316.1	1444
+KI270340.1	1428
+KI270338.1	1428
+KI270583.1	1400
+KI270334.1	1368
+KI270429.1	1361
+KI270393.1	1308
+KI270516.1	1300
+KI270389.1	1298
+KI270466.1	1233
+KI270388.1	1216
+KI270544.1	1202
+KI270310.1	1201
+KI270412.1	1179
+KI270395.1	1143
+KI270376.1	1136
+KI270337.1	1121
+KI270335.1	1048
+KI270378.1	1048
+KI270379.1	1045
+KI270329.1	1040
+KI270419.1	1029
+KI270336.1	1026
+KI270312.1	998
+KI270539.1	993
+KI270385.1	990
+KI270423.1	981
+KI270392.1	971
+KI270394.1	970
+Genome sequence total length = 3099750718
+Genome size with padding = 3138387968
+Nov 14 12:14:41 ..... processing annotations GTF
+Processing pGe.sjdbGTFfile=/root/Desktop/workspace/hdd/yue/data/text/Homo_sapiens.GRCh38.99.gtf, found:
+		227818 transcripts
+		1376499 exons (non-collapsed)
+		383259 collapsed junctions
+Total junctions: 383259
+Nov 14 12:14:59 ..... finished GTF processing
+
+Estimated genome size with padding and SJs: total=genome+SJ=3339387968 = 3138387968 + 201000000
+GstrandBit=32
+Number of SA indices: 5891698134
+Nov 14 12:15:18 ... starting to sort Suffix Array. This may take a long time...
+Number of chunks: 172;   chunks size limit: 370848352 bytes
+Nov 14 12:15:50 ... sorting Suffix Array chunks and saving them to disk...
+Writing 206909912 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_22 ; empty space on disk = 96794603520 bytes ... done
+Writing 260350264 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_31 ; empty space on disk = 96587689984 bytes ... done
+Writing 232985656 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_10 ; empty space on disk = 96327315456 bytes ... done
+Writing 190254192 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_16 ; empty space on disk = 96094326784 bytes ...Writing 173391504 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_8 ; empty space on disk = 96031039488 bytes ... done
+ done
+Writing 182570464 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_5 ; empty space on disk = 95730671616 bytes ... done
+Writing 249543648 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_17 ; empty space on disk = 95560060928 bytes ... done
+Writing 225321304 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_6 ; empty space on disk = 95308075008 bytes ... done
+Writing 356611864 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_19 ; empty space on disk = 95081594880 bytes ... done
+Writing 349223624 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_14 ; empty space on disk = 94723932160 bytes ... done
+Writing 348732728 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_11 ; empty space on disk = 94374707200 bytes ... done
+Writing 218081152 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_9 ; empty space on disk = 94025973760 bytes ... done
+Writing 204767696 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_32 ; empty space on disk = 93807890432 bytes ... done
+Writing 251686880 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_18 ; empty space on disk = 93603086336 bytes ... done
+Writing 219632072 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_35 ; empty space on disk = 93351395328 bytes ... done
+Writing 307215176 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_20 ; empty space on disk = 93131759616 bytes ... done
+Writing 232422952 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_27 ; empty space on disk = 92824530944 bytes ... done
+Writing 176517296 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_25 ; empty space on disk = 92592107520 bytes ...Writing 193960968 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_12 ; empty space on disk = 92450324480 bytes ... done
+ done
+Writing 208915248 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_30 ; empty space on disk = 92221624320 bytes ... done
+Writing 217446712 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_29 ; empty space on disk = 92012703744 bytes ... done
+Writing 311514168 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_37 ; empty space on disk = 91795255296 bytes ... done
+Writing 267574576 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_26 ; empty space on disk = 91483725824 bytes ... done
+Writing 232986248 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_23 ; empty space on disk = 91216125952 bytes ... done
+Writing 346685312 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_2 ; empty space on disk = 90983133184 bytes ...Writing 320306280 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_7 ; empty space on disk = 90919538688 bytes ... done
+ done
+Writing 374644360 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_24 ; empty space on disk = 90316054528 bytes ... done
+Writing 229150192 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_28 ; empty space on disk = 89941409792 bytes ... done
+Writing 279164656 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_13 ; empty space on disk = 89712250880 bytes ... done
+Writing 263072600 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_15 ; empty space on disk = 89433083904 bytes ... done
+Writing 316266096 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_34 ; empty space on disk = 89170010112 bytes ... done
+Writing 287929304 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_4 ; empty space on disk = 88853737472 bytes ... done
+Writing 225322440 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_36 ; empty space on disk = 88565755904 bytes ... done
+Writing 328240512 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_39 ; empty space on disk = 88340430848 bytes ... done
+Writing 326959608 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_38 ; empty space on disk = 88012185600 bytes ... done
+Writing 270535776 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_1 ; empty space on disk = 87685222400 bytes ... done
+Writing 365541792 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_33 ; empty space on disk = 87414685696 bytes ... done
+Writing 321324048 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_21 ; empty space on disk = 87049138176 bytes ... done
+Writing 473007664 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_3 ; empty space on disk = 86727766016 bytes ... done
+Writing 725537968 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_0 ; empty space on disk = 86254649344 bytes ... done
+Writing 197785016 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_48 ; empty space on disk = 85544296448 bytes ... done
+Writing 206651184 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_66 ; empty space on disk = 85346504704 bytes ... done
+Writing 222299208 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_54 ; empty space on disk = 85139853312 bytes ... done
+Writing 241796776 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_67 ; empty space on disk = 84917551104 bytes ... done
+Writing 217070184 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_57 ; empty space on disk = 84675747840 bytes ... done
+Writing 206910136 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_59 ; empty space on disk = 84458668032 bytes ... done
+Writing 274629512 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_46 ; empty space on disk = 84251598848 bytes ... done
+Writing 251686848 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_45 ; empty space on disk = 83976962048 bytes ... done
+Writing 232422760 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_42 ; empty space on disk = 83725258752 bytes ... done
+Writing 197785264 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_52 ; empty space on disk = 83492802560 bytes ...Writing 190466264 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_64 ; empty space on disk = 83309264896 bytes ... done
+ done
+Writing 257001680 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_65 ; empty space on disk = 83104546816 bytes ... done
+Writing 225657984 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_47 ; empty space on disk = 82847424512 bytes ... done
+Writing 259809456 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_76 ; empty space on disk = 82621763584 bytes ... done
+Writing 257262440 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_58 ; empty space on disk = 82361950208 bytes ... done
+Writing 257262440 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_71 ; empty space on disk = 82104684544 bytes ... done
+Writing 180059520 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_41 ; empty space on disk = 81847410688 bytes ... done
+Writing 222313016 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_70 ; empty space on disk = 81667350528 bytes ... done
+Writing 221528704 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_61 ; empty space on disk = 81445036032 bytes ... done
+Writing 218506248 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_40 ; empty space on disk = 81223503872 bytes ... done
+Writing 266836664 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_77 ; empty space on disk = 81004994560 bytes ... done
+Writing 243675976 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_43 ; empty space on disk = 80738156544 bytes ... done
+Writing 209469016 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_63 ; empty space on disk = 80494473216 bytes ... done
+Writing 361610176 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_60 ; empty space on disk = 80285003776 bytes ...Writing 299217704 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_75 ; empty space on disk = 80239104000 bytes ... done
+ done
+Writing 237802800 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_79 ; empty space on disk = 79624159232 bytes ... done
+Writing 352301192 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_51 ; empty space on disk = 79386341376 bytes ... done
+Writing 271756752 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_56 ; empty space on disk = 79034023936 bytes ... done
+Writing 279165992 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_62 ; empty space on disk = 78762254336 bytes ... done
+Writing 219632304 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_55 ; empty space on disk = 78483079168 bytes ... done
+Writing 473007664 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_49 ; empty space on disk = 78263443456 bytes ... done
+Writing 307347008 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_74 ; empty space on disk = 77790433280 bytes ... done
+Writing 263352112 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_69 ; empty space on disk = 77483085824 bytes ... done
+Writing 348436192 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_50 ; empty space on disk = 77219729408 bytes ... done
+Writing 366940944 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_44 ; empty space on disk = 76871155712 bytes ... done
+Writing 268644208 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_53 ; empty space on disk = 76504207360 bytes ... done
+Writing 368967544 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_68 ; empty space on disk = 76235563008 bytes ... done
+Writing 267574824 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_78 ; empty space on disk = 75866583040 bytes ... done
+Writing 351504976 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_72 ; empty space on disk = 75598995456 bytes ... done
+Writing 338370168 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_73 ; empty space on disk = 75247472640 bytes ... done
+Writing 172133384 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_83 ; empty space on disk = 74908995584 bytes ... done
+Writing 140047576 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_91 ; empty space on disk = 74736799744 bytes ... done
+Writing 257001680 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_81 ; empty space on disk = 74596368384 bytes ... done
+Writing 208651200 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_80 ; empty space on disk = 74339348480 bytes ... done
+Writing 193963368 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_96 ; empty space on disk = 74130571264 bytes ... done
+Writing 217070184 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_102 ; empty space on disk = 73936584704 bytes ... done
+Writing 202477640 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_85 ; empty space on disk = 73719414784 bytes ... done
+Writing 249543832 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_82 ; empty space on disk = 73516933120 bytes ... done
+Writing 348123296 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_99 ; empty space on disk = 73267376128 bytes ... done
+Writing 176517464 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_115 ; empty space on disk = 72919252992 bytes ... done
+Writing 173393008 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_103 ; empty space on disk = 72742727680 bytes ... done
+Writing 229002112 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_105 ; empty space on disk = 72569331712 bytes ... done
+Writing 225658344 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_89 ; empty space on disk = 72340324352 bytes ... done
+Writing 247387528 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_112 ; empty space on disk = 72114663424 bytes ... done
+Writing 213139088 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_110 ; empty space on disk = 71867273216 bytes ... done
+Writing 368141744 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_107 ; empty space on disk = 71654133760 bytes ... done
+Writing 309977024 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_97 ; empty space on disk = 71285977088 bytes ... done
+Writing 317838568 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_100 ; empty space on disk = 70975975424 bytes ... done
+Writing 328594384 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_111 ; empty space on disk = 70657863680 bytes ... done
+Writing 262894912 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_92 ; empty space on disk = 70329257984 bytes ... done
+Writing 190466264 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_117 ; empty space on disk = 70066270208 bytes ... done
+Writing 277877208 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_109 ; empty space on disk = 69875802112 bytes ... done
+Writing 302688848 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_90 ; empty space on disk = 69597921280 bytes ... done
+Writing 340534920 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_106 ; empty space on disk = 69295194112 bytes ... done
+Writing 265049480 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_101 ; empty space on disk = 68954656768 bytes ... done
+Writing 283083688 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_113 ; empty space on disk = 68689604608 bytes ... done
+Writing 346693088 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_86 ; empty space on disk = 68406517760 bytes ...Writing 285774120 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_95 ; empty space on disk = 68209197056 bytes ... done
+ done
+Writing 266218960 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_114 ; empty space on disk = 67774046208 bytes ... done
+Writing 345185552 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_104 ; empty space on disk = 67507818496 bytes ... done
+Writing 362545216 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_88 ; empty space on disk = 67162628096 bytes ... done
+Writing 223467944 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_84 ; empty space on disk = 66800074752 bytes ... done
+Writing 332887112 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_108 ; empty space on disk = 66576601088 bytes ... done
+Writing 329854880 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_116 ; empty space on disk = 66243698688 bytes ... done
+Writing 318020528 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_94 ; empty space on disk = 65913843712 bytes ... done
+Writing 358593720 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_87 ; empty space on disk = 65595727872 bytes ... done
+Writing 368941400 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_98 ; empty space on disk = 65237118976 bytes ...Writing 364558608 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_93 ; empty space on disk = 65087168512 bytes ... done
+ done
+Writing 274629672 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_123 ; empty space on disk = 64503595008 bytes ... done
+Writing 288900824 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_119 ; empty space on disk = 64228958208 bytes ... done
+Writing 326638144 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_118 ; empty space on disk = 63940030464 bytes ... done
+Writing 383205784 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_121 ; empty space on disk = 63613370368 bytes ... done
+Writing 308516952 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_122 ; empty space on disk = 63230156800 bytes ... done
+Writing 270540176 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_120 ; empty space on disk = 62921191424 bytes ... done
+Writing 176218792 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_125 ; empty space on disk = 62650535936 bytes ... done
+Writing 197968672 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_152 ; empty space on disk = 62474301440 bytes ... done
+Writing 241796776 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_151 ; empty space on disk = 62283128832 bytes ... done
+Writing 222550408 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_153 ; empty space on disk = 62041309184 bytes ... done
+Writing 275464512 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_128 ; empty space on disk = 61818748928 bytes ... done
+Writing 218506520 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_145 ; empty space on disk = 61543276544 bytes ... done
+Writing 186609208 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_150 ; empty space on disk = 61324763136 bytes ... done
+Writing 146335040 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_143 ; empty space on disk = 61138141184 bytes ... done
+Writing 211893784 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_147 ; empty space on disk = 60991799296 bytes ... done
+Writing 287560032 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_127 ; empty space on disk = 60779773952 bytes ...Writing 308166112 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_157 ; empty space on disk = 60735725568 bytes ... done
+ done
+Writing 232409120 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_136 ; empty space on disk = 60184043520 bytes ... done
+Writing 175433680 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_154 ; empty space on disk = 59951616000 bytes ... done
+Writing 198875888 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_132 ; empty space on disk = 59776180224 bytes ... done
+Writing 287930184 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_156 ; empty space on disk = 59577303040 bytes ... done
+Writing 262894912 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_139 ; empty space on disk = 59289370624 bytes ... done
+Writing 311514392 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_159 ; empty space on disk = 59026468864 bytes ... done
+Writing 243676312 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_134 ; empty space on disk = 58714947584 bytes ...Writing 268644208 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_155 ; empty space on disk = 58609225728 bytes ... done
+ done
+Writing 246975800 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_131 ; empty space on disk = 58202615808 bytes ... done
+Writing 348733736 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_130 ; empty space on disk = 57955614720 bytes ... done
+Writing 196200792 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_138 ; empty space on disk = 57606762496 bytes ... done
+Writing 342516808 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_129 ; empty space on disk = 57410555904 bytes ... done
+Writing 229150400 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_148 ; empty space on disk = 57068036096 bytes ... done
+Writing 237874240 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_146 ; empty space on disk = 56838885376 bytes ... done
+Writing 237802800 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_133 ; empty space on disk = 56601010176 bytes ... done
+Writing 259809456 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_144 ; empty space on disk = 56363204608 bytes ... done
+Writing 319004680 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_126 ; empty space on disk = 56103391232 bytes ... done
+Writing 346671904 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_158 ; empty space on disk = 55784366080 bytes ... done
+Writing 271756752 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_140 ; empty space on disk = 55437680640 bytes ... done
+Writing 354252424 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_124 ; empty space on disk = 55165923328 bytes ... done
+Writing 237213488 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_149 ; empty space on disk = 54811668480 bytes ... done
+Writing 237213488 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_135 ; empty space on disk = 54574444544 bytes ... done
+Writing 7616 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_171 ; empty space on disk = 54337224704 bytes ... done
+Writing 366629080 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_137 ; empty space on disk = 54337216512 bytes ...Writing 320310296 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_141 ; empty space on disk = 54173102080 bytes ... done
+ done
+Writing 302679784 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_142 ; empty space on disk = 53650255872 bytes ... done
+Writing 269471120 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_161 ; empty space on disk = 53347573760 bytes ... done
+Writing 302679784 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_160 ; empty space on disk = 53078085632 bytes ... done
+Writing 246977816 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_163 ; empty space on disk = 52779970560 bytes ... done
+Writing 374644360 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_162 ; empty space on disk = 52530536448 bytes ... done
+Writing 178998032 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_164 ; empty space on disk = 52155858944 bytes ... done
+Writing 209469016 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_165 ; empty space on disk = 51976847360 bytes ... done
+Writing 263072896 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_166 ; empty space on disk = 51767377920 bytes ... done
+Writing 383205784 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_167 ; empty space on disk = 51504201728 bytes ... done
+Writing 348429288 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_169 ; empty space on disk = 51120947200 bytes ... done
+Writing 358593720 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_168 ; empty space on disk = 50772484096 bytes ... done
+Writing 725537968 bytes into /root/Desktop/workspace/ssd/yue/indices//SA_170 ; empty space on disk = 50405392384 bytes ... done
+Nov 14 12:42:31 ... loading chunks from disk, packing SA...
+Nov 14 12:43:50 ... finished generating suffix array
+Nov 14 12:43:50 ... generating Suffix Array index
+Nov 14 12:47:37 ... completed Suffix Array index
+WARNING: long repeat for junction # 126352 : 15 88855522 88855578; left shift = 14; right shift = 255
+Nov 14 12:47:37   Finished preparing junctions
+Nov 14 12:47:37 ..... inserting junctions into the genome indices
+Nov 14 12:48:33   Finished SA search: number of new junctions=383200, old junctions=0
+Nov 14 12:51:27   Finished sorting SA indicesL nInd=153280000
+Genome size with junctions=3215411168  3138387968   77023200
+GstrandBit1=32   GstrandBit=32
+Nov 14 12:52:33   Finished inserting junction indices
+Nov 14 12:53:14   Finished SAi
+Nov 14 12:53:14 ..... finished inserting junctions into genome
+Nov 14 12:53:14 ... writing Genome to disk ...
+Writing 3215411168 bytes into /root/Desktop/workspace/ssd/yue/indices//Genome ; empty space on disk = 96765583360 bytes ... done
+SA size in bytes: 24935534806
+Nov 14 12:53:17 ... writing Suffix Array to disk ...
+Writing 24935534806 bytes into /root/Desktop/workspace/ssd/yue/indices//SA ; empty space on disk = 93550157824 bytes ... done
+Nov 14 12:54:00 ... writing SAindex to disk
+Writing 8 bytes into /root/Desktop/workspace/ssd/yue/indices//SAindex ; empty space on disk = 68614467584 bytes ... done
+Writing 120 bytes into /root/Desktop/workspace/ssd/yue/indices//SAindex ; empty space on disk = 68614467584 bytes ... done
+Writing 1565873491 bytes into /root/Desktop/workspace/ssd/yue/indices//SAindex ; empty space on disk = 68614467584 bytes ... done
+Nov 14 12:54:04 ..... finished successfully
+DONE: Genome generation, EXITING
