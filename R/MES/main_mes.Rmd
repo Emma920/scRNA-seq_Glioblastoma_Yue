@@ -1,0 +1,1046 @@
+---
+title: "main_mes.Rmd"
+author: "Yue He"
+date: "10/28/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '~/hdd/yue')
+library(reticulate)
+use_python("/home/yue/miniconda3/bin/python3", required = TRUE)
+```
+
+
+```{python}
+# This is just a test to see if python is working properly
+import sys
+print(sys.executable)
+import scanpy as sc
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{r}
+suppressPackageStartupMessages({
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(msigdbr)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(uwot)
+library(Rtsne)
+library(PCAtools)
+library(rlist)
+library("RColorBrewer")
+#library(d3heatmap)
+#library(Seurat)
+})
+
+#LOAD FILES####################################################################################
+#source("code/R/Darmanis/load_files.R")
+#countMatrix <- knit_aggregate("/home/hdd/yue/data/aligned/Darmanis/kallisto/", "*.tsv")
+#write.table(countMatrix, file="/home/hdd/yue/data/CM/Darmanis/countMatrix")
+
+#source("/home/hdd/yue/code/R/Darmanis/load_STARfiles.R")
+#countMatrix_S <- knit_STARaggregate("/home/hdd/yue/data/aligned/Darmanis/STAR/", "*ReadsPerGene.out.tab")
+#write.table(countMatrix_S, file="/home/hdd/yue/data/CM/Darmanis/countMatrix_S")
+
+#LOAD DATA#####################################################################################
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing_lib.R")
+source("/home/yue/hdd/yue/code/R/Neftel/pre_processing_Neftel.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data_Neftel.R")
+
+sce <-load.data("/home/yue/hdd/yue/data/CM/Darmanis/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Darmanis/neo_metadata.csv" )
+sceP <-load.data("/home/yue/hdd/yue/data/CM/Patel/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Patel/Patel_meta.csv" )
+sceN <-load.data.Neftel("/home/yue/hdd/yue/data/CM/Neftel/GSM3828672_Smartseq2_GBM_IDHwt_processed_TPM.tsv", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Neftel/meta_Neftel.csv" )
+
+sceN@assays@data@listData[["counts"]]<-sceN@assays@data@listData[["tpm"]]
+sceN <- pre.processing.Neftel(sceN)
+
+sceN@assays@data@listData[["logcounts"]]<-sceN@assays@data@listData[["tpm"]]
+
+###############################################################################################
+```
+
+
+
+```{r}
+set.seed(6)
+#WITH EACH PATIENT#############################################################################
+#Darmanis
+sce.BT_S2.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S2"))
+sce.BT_S1.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S1"))
+sce.BT_S4.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S4"))
+sce.BT_S6.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S6"))
+
+#Patel
+sce.MGH26.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH26"))
+sce.MGH28.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH28"))
+sce.MGH29.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH29"))
+sce.MGH30.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH30"))
+sce.MGH31.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH31"))
+
+#Neftel
+sce.MGH101.total <- subset(sceN, , tumour.name=="MGH101")
+sce.MGH100.total <- subset(sceN, , tumour.name=="MGH100")
+sce.MGH102.total <- subset(sceN, , tumour.name=="MGH102")
+sce.MGH104.total <- subset(sceN, , tumour.name=="MGH104")
+sce.MGH105.total <- subset(sceN, , tumour.name=="MGH105")
+sce.MGH106.total <- subset(sceN, , tumour.name=="MGH106")
+sce.MGH110.total <- subset(sceN, , tumour.name=="MGH110")
+sce.MGH113.total <- subset(sceN, , tumour.name=="MGH113")
+sce.MGH115.total <- subset(sceN, , tumour.name=="MGH115")
+sce.MGH121.total <- subset(sceN, , tumour.name=="MGH121")
+sce.MGH122.total <- subset(sceN, , tumour.name=="MGH122")
+sce.MGH124.total <- subset(sceN, , tumour.name=="MGH124")
+sce.MGH125.total <- subset(sceN, , tumour.name=="MGH125")
+sce.BT749.total <- subset(sceN, , tumour.name=="BT749")
+sce.BT771.total <- subset(sceN, , tumour.name=="BT771")
+sce.BT830.total <- subset(sceN, , tumour.name=="BT830")
+sce.MGH85.total <- subset(sceN, , tumour.name=="MGH85")
+sce.BT1160.total <- subset(sceN, , tumour.name=="BT1160")
+sce.BT1187.total <- subset(sceN, , tumour.name=="BT1187")
+sce.BT786.total <- subset(sceN, , tumour.name=="BT786")
+sce.BT920.total <- subset(sceN, , tumour.name=="BT920")
+sce.MGH128.total <- subset(sceN, , tumour.name=="MGH128")
+sce.MGH129.total <- subset(sceN, , tumour.name=="MGH129")
+sce.MGH136.total <- subset(sceN, , tumour.name=="MGH136")
+sce.MGH143.total <- subset(sceN, , tumour.name=="MGH143")
+sce.MGH151.total <- subset(sceN, , tumour.name=="MGH151")
+sce.MGH152.total <- subset(sceN, , tumour.name=="MGH152")
+sce.MGH66.total <- subset(sceN, , tumour.name=="MGH66")
+```
+
+
+
+```{r}
+#Clusting############################################################################
+set.seed(6)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting/clusting_change.R")
+sce.BT_S1.total@colData@listData[["label"]] <- clusting.change(sce.BT_S1.total)
+sce.BT_S2.total@colData@listData[["label"]] <- clusting.change(sce.BT_S2.total)
+
+sce.BT_S4.total@colData@listData[["label"]] <- clusting.change(sce.BT_S4.total)
+sce.BT_S6.total@colData@listData[["label"]] <- clusting.change(sce.BT_S6.total)
+sce.MGH26.total@colData@listData[["label"]] <- clusting.change(sce.MGH26.total)
+sce.MGH28.total@colData@listData[["label"]] <- clusting.change(sce.MGH28.total)
+sce.MGH29.total@colData@listData[["label"]] <- clusting.change(sce.MGH29.total)
+sce.MGH30.total@colData@listData[["label"]] <- clusting.change(sce.MGH30.total)
+sce.MGH31.total@colData@listData[["label"]] <- clusting.change(sce.MGH31.total)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting/clusting_tpm_change.R")
+sce.MGH101.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH101.total)
+sce.MGH100.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH100.total)
+sce.MGH102.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH102.total)
+sce.MGH104.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH104.total)
+sce.MGH105.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH105.total)
+sce.MGH106.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH106.total)
+sce.MGH110.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH110.total)
+sce.MGH113.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH113.total)
+sce.MGH115.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH115.total)
+sce.MGH121.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH121.total)
+sce.MGH122.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH122.total)
+sce.MGH124.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH124.total)
+sce.MGH125.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH125.total)
+sce.BT749.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT749.total)
+sce.BT771.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT771.total)
+sce.BT830.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT830.total)
+sce.MGH85.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH85.total)
+sce.BT1160.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT1160.total)
+sce.BT1187.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT1187.total)
+sce.BT786.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT786.total)
+sce.BT920.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT920.total)
+sce.MGH128.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH128.total)
+sce.MGH129.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH129.total)
+sce.MGH136.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH136.total)
+sce.MGH143.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH143.total)
+sce.MGH151.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH151.total)
+sce.MGH152.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH152.total)
+sce.MGH66.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH66.total)
+
+rm(sce, sceN, sceP)
+
+```
+
+
+
+
+```{r}
+#clusting_check
+set.seed(6)
+
+source("code/R/Darmanis/dimension_reduction.R")
+
+sce.check <- dataList[["sce.MGH122.total"]]
+
+genes.check <- row.names(counts(sce.check))
+
+sce.check <- dimension.reduction(genes.check, sce.check)
+
+plotReducedDim(sce.check, dimred="TSNE", colour_by ="BCAN")
+```
+
+
+```{r}
+#Get dataList for all the SingleCellExperiment (Here you need to run the main_PROM1_cluster.r script to the dataList part)
+set.seed(6)
+
+dataList0 <- mget(ls(pattern = '*.total'))
+
+dataList <- dataList0[c("sce.BT_S1.total", "sce.BT_S2.total", "sce.BT_S4.total","sce.BT_S6.total","sce.MGH26.total","sce.MGH28.total",
+                       "sce.MGH29.total","sce.MGH30.total","sce.MGH31.total","sce.BT749.total","sce.BT771.total","sce.BT786.total",                                "sce.BT830.total","sce.BT920.total","sce.BT1160.total","sce.BT1187.total","sce.MGH66.total","sce.MGH85.total",
+                        "sce.MGH100.total","sce.MGH101.total","sce.MGH102.total","sce.MGH104.total","sce.MGH105.total","sce.MGH106.total",
+                        "sce.MGH110.total","sce.MGH113.total","sce.MGH115.total","sce.MGH121.total","sce.MGH122.total","sce.MGH124.total",
+                        "sce.MGH125.total","sce.MGH128.total","sce.MGH129.total","sce.MGH136.total","sce.MGH143.total","sce.MGH151.total",
+                        "sce.MGH152.total")]
+rm(sce.BT_S1.total, sce.BT_S2.total, sce.BT_S4.total, sce.BT_S6.total, sce.MGH26.total, sce.MGH28.total, sce.MGH29.total, sce.MGH30.total, sce.MGH31.total, sce.MGH66.total, sce.MGH85.total, sce.BT1160.total, sce.BT1187.total, sce.BT749.total, sce.BT771.total, sce.BT786.total, sce.BT830.total, sce.BT920.total, sce.MGH100.total, sce.MGH101.total, sce.MGH102.total, sce.MGH104.total, sce.MGH105.total, sce.MGH106.total, sce.MGH110.total, sce.MGH113.total, sce.MGH115.total, sce.MGH121.total, sce.MGH122.total, sce.MGH124.total, sce.MGH125.total, sce.MGH128.total, sce.MGH129.total, sce.MGH136.total, sce.MGH143.total, sce.MGH151.total, sce.MGH152.total)
+
+```
+
+
+```{r}
+#pre-processing check
+#DIMENSION REDUCTION ON EACH PATIENT CELLS######################################################
+set.seed(6)
+
+source("code/R/Darmanis/dimension_reduction.R")
+
+for (i in (1:length(dataList))){
+  sce.check <- dataList[[i]]
+  genes.check <- row.names(counts(sce.check))
+
+  sce.check <- dimension.reduction(genes.check, sce.check)
+
+  plotReducedDim(sce.check, dimred="TSNE", colour_by ="BCAN")+ 
+  ggsave(paste("data/output/figures/PROM1/tsne_bcan/", names(dataList[i]), ".pdf",sep = ""), width = 8,  height = 6)
+}
+
+
+
+for (i in (1:length(dataList))){
+  sce.check <- dataList[[i]]
+a0 <- colSums(counts(sce.check))
+b0 <- colSums(counts(sce.check) != 0)
+sce.counts <- data.frame(a = a0, b=b0, c= as.factor(sce.check@colData@listData[["label"]]))
+
+ggplot(sce.counts, aes(x=a, y=b, color=c))+ 
+  geom_point()+
+  scale_fill_brewer(palette = "Dark2")+
+  ggsave(paste("data/output/figures/PROM1/dispersion/", names(dataList[i]), ".pdf",sep = ""), width = 8,  height = 6)
+}
+
+sce.check <- dataList[["sce.BT771.total"]]
+a0 <- colSums(counts(sce.check))
+b0 <- colSums(counts(sce.check) != 0)
+sce.counts <- data.frame(a = a0, b=b0, c= as.factor(sce.check@colData@listData[["label"]]))
+
+ggplot(sce.counts, aes(x=a, y=b, color=c))+ 
+  geom_point()+
+  scale_fill_brewer(palette = "Dark2")+
+#  scale_x_log10()+
+#  scale_y_log10()
+
+
+```
+
+
+
+```{r}
+#Calculate ranks#################################################################
+set.seed(6)
+
+ranks.per.gene <- function(x) {
+  y <- frank(replace(x,x==0,NA), ties.method = "average", na.last = "keep")*100/sum(x!=0)
+  rownames(y)<- rownames(x)
+  return(y)
+}
+
+
+for (i in 1:length(dataList)){
+  
+  dataList[[i]]@assays@data@listData[["ranks"]]<-apply(logcounts(dataList[[i]]), 2, ranks.per.gene)
+  rownames(dataList[[i]]@assays@data@listData[["ranks"]]) <- rownames(logcounts(dataList[[i]]))
+}
+
+#length(which(is.na(x["PROM1"])))*100/nrow(x)
+
+```
+
+
+
+
+
+
+
+
+```{r}
+#convert r object to python object##################################################
+set.seed(6)
+
+library("reticulate")
+library("ggplot2")
+library("SingleCellExperiment")
+library("scater")
+
+dataList_names <- list()
+exprs_list <- list()
+col_data_list <- list()
+row_data_list <- list()
+
+for (i in 1:(length(dataList))){
+  exprs <- assay(dataList[[i]], "logcounts")
+  col_data <- as.data.frame(colData(dataList[[i]]))
+  row_data <- as.data.frame(row.names(dataList[[i]]))
+  exprs_list <- list.append(exprs_list, exprs)
+  col_data_list <- list.append(col_data_list, col_data)
+  row_data_list <- list.append(row_data_list, row_data)
+  dataList_names <- list.append(dataList_names, names(dataList)[i])
+}
+```
+
+
+```{python}
+#find marker genes with scanpy########################################################
+
+
+import scanpy as sc
+import warnings
+
+
+patients_dict = {}
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    for i in range(len(r.dataList_names)):
+        name = r.dataList_names[i]
+        adata_sce = sc.AnnData(X = r.exprs_list[i].T, obs = r.col_data_list[i], var = r.row_data_list[i])
+        
+        adata_sce.obs['label'] = adata_sce.obs['label'].astype('int').astype('str').astype('category')
+        adata_sce.var.index = list(adata_sce.var[adata_sce.var.columns[0]])
+        
+        sc.tl.rank_genes_groups(adata_sce, groupby = 'label', method = 't-test_overestim_var')
+        patients_dict[name] = {}
+        for n , cluster in enumerate(adata_sce.obs['label'].cat.categories):
+           assert str(n + 1) == cluster
+           diffexpr = sc.get.rank_genes_groups_df(adata_sce, cluster)
+           diffexpr.index = [i+1 for i in diffexpr.index]
+           patients_dict[name][int(cluster)] = diffexpr
+        print(i, name, len(patients_dict))
+    
+```
+
+
+
+```{r}
+#convert python list to r list#######################################################
+set.seed(6)
+
+patients_list <- py$patients_dict
+
+markers.patients <- list()
+for (i in 1:(length(patients_list))){
+  library(rlist)
+  markers.clusters <- list()
+  for (j in 1: length(patients_list[[i]])){
+    x <- py_to_r(patients_list[[i]][[j]])
+    markers.clusters <- list.append(markers.clusters,x)
+    names(markers.clusters)[j]<-  j
+  }
+  markers.patients <- list.append(markers.patients, markers.clusters)
+  names(markers.patients)[i]<-  names(patients_list[i])
+  
+}
+rm(markers.clusters, x, col_data_list, dataList_names, exprs_list, row_data_list, patients_list, col_data)
+
+#export markers for every cluster
+markers.all <- list()
+for (i in 1:(length(markers.patients))){
+  markers.all[[i]] <- list()
+  for (j in 1:length(markers.patients[[i]])){
+    df0 <- markers.patients[[i]][[j]][markers.patients[[i]][[j]]$pvals_adj<0.05,]
+    df <- df0[df0$logfoldchanges>2,]
+    markers.all[[i]] <- list.append(markers.all[[i]], df)
+    names(markers.all[[i]])[[j]] <-  j
+    write.table(markers.all[[i]][[j]], file= paste("/home/yue/hdd/yue/data/output/figures/MES/all_cluster_markers_MES/",names(markers.patients)[i], j, ".csv", sep=""))
+  }
+  markers.all <- list.append(markers.all, markers.all[[i]])
+  names(markers.all)[i]<-  names(markers.patients)[i]
+  
+}
+
+#get all the clusters with PROM1 in it. 
+
+#clusters.PROM1 <- list(MGH100_2 = markers.patients[["sce.MGH100.total"]][["2"]], MGH101_2 = markers.patients[["sce.MGH101.total"]][["2"]], MGH102_2=markers.patients[["sce.MGH102.total"]][["2"]], MGH113_1=markers.patients[["sce.MGH113.total"]][["1"]], MGH122_3 = markers.patients[["sce.MGH122.total"]][["3"]], MGH124_1 = markers.patients[["sce.MGH124.total"]][["1"]], MGH125_2 = markers.patients[["sce.MGH125.total"]][["2"]], MGH151_2 = markers.patients[["sce.MGH151.total"]][["2"]])
+
+
+```
+
+
+```{r}
+set.seed(6)
+
+library(EnhancedVolcano)
+test <- clusters.PROM1[["MGH136_1"]]
+EnhancedVolcano(test,
+    lab = test$names,
+    selectLab = c('PROM1'),
+    x = 'logfoldchanges',
+    y = 'pvals_adj',
+    xlab = bquote(~Log[2]~ 'fold change'),
+    col=c("black", '#1f78b4', '#33a02c', 'orange1'),
+    pCutoff = 0.05,
+    FCcutoff = 2.0,
+    pointSize = 1,#c(ifelse(test$names=="PROM1", 8, 1)),
+    labSize = 6.0,
+    colAlpha = 1,
+    legendPosition = 'right',
+    legendLabSize = 12,
+    legendIconSize = 4.0,
+    drawConnectors = TRUE,
+    widthConnectors = 0.75,
+    legendVisible = FALSE)
+
+for (i in 1:length(clusters.PROM1)){
+  a <- clusters.PROM1[[i]]
+  EnhancedVolcano(a,
+    lab = NA,
+    x = 'logfoldchanges',
+    y = 'pvals_adj',
+    col=c("black", '#1f78b4', '#33a02c', 'orange1'),
+    pCutoff = 0.05,
+    FCcutoff = 2.0,
+    pointSize = 3,
+    colAlpha = 1,
+    legendVisible = FALSE)+
+    ggplot2::theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        plot.title = element_blank(),
+        legend.text = element_blank(),
+        title = element_blank(),
+        plot.subtitle = element_blank(),
+        plot.caption = element_blank() )
+    ggplot2::ggsave(paste("data/output/figures/PROM1/volcano/",names(clusters.PROM1)[i], "_prom1_volcano",".png"), width = 8,   height = 6)
+}  
+
+```
+
+
+
+
+```{r}
+# the stem-like clusters markers
+set.seed(6)
+
+markers.mes1<- list(BT771_4=markers.all[["sce.BT771.total"]][["4"]], BT771_5=markers.all[["sce.BT771.total"]][["5"]], BT830_1 = markers.all[["sce.BT830.total"]][["1"]],
+BT920_2 = markers.all[["sce.BT920.total"]][["2"]], BT_S1_2 = markers.all[["sce.BT_S1.total"]][["2"]],
+BT_S2_2 = markers.all[["sce.BT_S2.total"]][["2"]], MGH66_4 = markers.all[["sce.MGH66.total"]][["4"]],
+MGH100_2 = markers.all[["sce.MGH100.total"]][["2"]], MGH101_2 = markers.all[["sce.MGH101.total"]][["2"]],
+MGH102_1 = markers.all[["sce.MGH102.total"]][["1"]], MGH102_2 = markers.all[["sce.MGH102.total"]][["2"]],
+MGH105_2 = markers.all[["sce.MGH105.total"]][["2"]],
+MGH106_1 = markers.all[["sce.MGH106.total"]][["1"]],
+MGH110_4 = markers.all[["sce.MGH110.total"]][["4"]],
+MGH113_1 = markers.all[["sce.MGH113.total"]][["1"]], MGH115_1 = markers.all[["sce.MGH115.total"]][["1"]],
+MGH121_1 = markers.all[["sce.MGH121.total"]][["1"]],
+MGH122_3 = markers.all[["sce.MGH122.total"]][["3"]], MGH122_4 = markers.all[["sce.MGH122.total"]][["4"]],
+MGH124_1 = markers.all[["sce.MGH124.total"]][["1"]], MGH124_2 = markers.all[["sce.MGH124.total"]][["2"]],
+MGH125_2 = markers.all[["sce.MGH125.total"]][["2"]], 
+MGH125_4 = markers.all[["sce.MGH125.total"]][["4"]], 
+MGH129_3 = markers.all[["sce.MGH129.total"]][["3"]], MGH136_1 = markers.all[["sce.MGH136.total"]][["1"]],
+MGH136_3 = markers.all[["sce.MGH136.total"]][["3"]], MGH143_2 = markers.all[["sce.MGH143.total"]][["2"]], MGH151_2 = markers.all[["sce.MGH151.total"]][["2"]])
+
+
+```
+
+
+```{r}
+#find marker plot 
+#top 100 markers rank
+set.seed(6)
+
+top_200.stem.clusters <- data.frame()
+for (i in (1:length(markers.stem))){
+  x <- markers.stem[[i]][frank(markers.stem[[i]]$pvals_adj) <= 200,]
+  top_200.stem.clusters <- list.append(top_200.stem.clusters, x)
+  top_200.stem.clusters[[i]]$pval_rank <- frank(top_200.stem.clusters[[i]]$pvals_adj)*100/nrow(top_200.stem.clusters[[i]])
+  names(top_200.stem.clusters)[i]<-  names(markers.stem)[i]
+  
+}
+
+
+all.stem.genes <- c()
+for (i in (1:length(top_200.stem.clusters))){
+  all.stem.genes <- rbind(all.stem.genes, top_200.stem.clusters[[i]][, c(-2:-5)])
+  
+}
+freq <- as.data.frame(table(all.stem.genes$names))
+colnames(freq) <- c("names", "frequencies")
+
+all.stem.genes <- aggregate(all.stem.genes$pval_rank,
+          list(all.stem.genes$names),
+          median)
+colnames(all.stem.genes) <- c("names", "pval_median")
+
+all.stem.genes <- merge(all.stem.genes, freq, by = "names", all = T)
+colnames(all.stem.genes) <- c("names", "pval_rank_median", "frequencies")
+write.table(all.stem.genes, file="/home/yue/hdd/yue/data/output/figures/PROM1/all.stem.genes")
+```
+
+
+```{r}
+set.seed(6)
+
+ggplot(all.stem.genes, aes(x=all.stem.genes$pval_rank_median,y=all.stem.genes$frequencies))+ 
+  geom_point(alpha=1, size = 1)+
+  geom_text_repel(data=subset(all.stem.genes, frequencies > 12), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+
+  ggsave(paste("data/output/figures/PROM1/find_markers.pdf"), width = 8,  height = 6)
+#  geom_text(aes(label = all.prom1.genes$names))
+#  scale_color_manual(values=c("#7fc97f", "#beaed4", "#fdc086"))+
+
+```
+
+
+
+
+
+
+
+
+```{r}
+#make cluster enrichment figure
+set.seed(6)
+
+Immune_BPGO <- read.csv("data/upload/PROM1/ImmuneResponse_group_GOBP_top15.csv")
+Immune_KEGG <- read.csv("data/upload/PROM1/ImmuneResponse_group_KEGG_top15.csv")
+Cycle_BPGO <- read.csv("data/upload/PROM1/CellCycle_group_GOBP_top15.csv")
+Cycle_KEGG <- read.csv("data/upload/PROM1/CellCycle_group_KEGG_all.csv")
+Adhesion_BPGO <- read.csv("data/upload/PROM1/CellAdhesion_group_GOBP_top15.csv")
+Adhesion_KEGG <- read.csv("data/upload/PROM1/CellAdhesion_group_KEGG_all.csv")
+
+Immune_BPGO$term_name <- factor(Immune_BPGO$term_name)
+
+geom_bar(aes(factor(Decade), fill=factor(Motivation)), position='fill')
+
+
+p1 <- ggplot(Immune_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.8, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p2 <- ggplot(Immune_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.5, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p3 <- ggplot(Adhesion_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.8, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p4 <- ggplot(Adhesion_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.5, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p5 <- ggplot(Cycle_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.8, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p6 <- ggplot(Cycle_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.5, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+p12 <- plot_grid(p1, p2, ncol=1, align="v")
+  p12+ggsave("data/output/figures/PROM1/Immune_enrich.pdf", width = 8,   height = 6)  
+  
+p34 <- plot_grid( p3, p4, ncol=1, align="v")
+  p34+ggsave("data/output/figures/PROM1/Adhesion_enrich.pdf", width = 8,   height = 6)  
+
+p56 <- plot_grid( p5, p6, ncol=1, align="v")
+  p56+ggsave("data/output/figures/PROM1/Cycle_enrich.pdf", width = 8,   height = 6) 
+  
+rm(p1,p2,p3,p4,p5,p6,p12,p34,p56)
+```
+
+
+
+
+```{r}
+#enrichment of protein networks
+set.seed(6)
+
+Immune_left_GOBP <- read.csv("data/upload/PROM1/protein_network/cluster/all.genes.immune_left_enrich.csv")[10:24,]
+Immune_left_KEGG <- read.csv("data/upload/PROM1/protein_network/cluster/all.genes.immune_left_enrich.csv")[129:135,]
+Immune_right_GOBP <- read.csv("data/upload/PROM1/protein_network/cluster/all.genes.immune_right_enrich.csv")[25:39,]
+Immune_right_KEGG <- read.csv("data/upload/PROM1/protein_network/cluster/all.genes.immune_right_enrich.csv")[566:580,]
+
+Adhesion_left_GOBP <- read.csv("data/upload/PROM1/protein_network/cluster/all.genes.adhesion_left_enrich.csv")[10:24,]
+Adhesion_left_KEGG <- read.csv("data/upload/PROM1/protein_network/cluster/all.genes.adhesion_left_enrich.csv")[212:226,]
+Adhesion_right_GOBP <- read.csv("data/upload/PROM1/protein_network/cluster/all.genes.adhesion_right_enrich.csv")[2:16,]
+
+c1 <- ggplot(Immune_left_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+c2 <- ggplot(Immune_left_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+c12 <- plot_grid(c1,c2, ncol=1, align="v")
+  c12+ggsave("data/output/figures/PROM1/Immune_left_enrich.pdf", width = 8,   height = 6) 
+rm(c1, c2, Immune_left_KEGG, Immune_left_GOBP)
+
+c3 <- ggplot(Immune_right_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+c4 <- ggplot(Immune_right_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+c34 <- plot_grid(c3,c4, ncol=1, align="v")
+  c34+ggsave("data/output/figures/PROM1/Immune_right_enrich.pdf", width = 8,   height = 6) 
+rm(c3, c4, Immune_right_KEGG, Immune_right_GOBP)
+
+c5 <- ggplot(Adhesion_left_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+c6 <- ggplot(Adhesion_left_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+c56 <- plot_grid(c5,c6, ncol=1, align="v")
+  c56+ggsave("data/output/figures/PROM1/Adhesion_left_enrich.pdf", width = 8,   height = 6) 
+rm(c5, c6, Adhesion_left_KEGG, Adhesion_left_GOBP)
+
+c7 <- ggplot(Adhesion_right_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+c7+ggsave("data/output/figures/PROM1/Adhesion_right_enrich.pdf", width = 8,   height = 6)
+rm(C7, Adhesion_right_GOBP)
+
+rm(c1, c2, c3, c4, c5,c6,c7,c12,c34,c56)
+
+```
+
+
+
+```{r}
+# DE of high and low PROM1 cell groups
+set.seed(6)
+
+source("code/R/Neftel/edgeR.R")
+
+
+BCAN.edgeR.p0.05 <- list()
+for (i in 1: length(dataList)){
+  result1 <- edgeR(dataList[[i]], "BCAN")
+  result2 <- result1[result1$FDR < 0.05, ]
+  result3 <- result2[result2$logFC > 1, ]
+  BCAN.edgeR.p0.05 <- list.append(BCAN.edgeR.p0.05, result3)
+  names(BCAN.edgeR.p0.05)[i]<- str_sub(names(dataList[i]), 5, -7)
+  write.table(result3, file= paste("data/output/figures/PROM1/DE_BCAN/",names(dataList[i]), sep=""))
+
+}
+rm(result1, result2, result3, BCAN.edgeR.p0.05)
+
+adhesion_angio_bind <- unique(c(rownames(PROM1.edgeR.p0.05[["BT_S1"]]), rownames(PROM1.edgeR.p0.05[["BT_S2"]]), rownames(PROM1.edgeR.p0.05[["BT_S4"]]),rownames(PROM1.edgeR.p0.05[["BT771"]]),rownames(PROM1.edgeR.p0.05[["MGH121"]]), rownames(PROM1.edgeR.p0.05[["BT830"]]), rownames(PROM1.edgeR.p0.05[["BT771"]]), rownames(PROM1.edgeR.p0.05[["BT_S2"]])))
+write.table(adhesion_angio_bind, file= "data/output/figures/PROM1/adhesion_angio_bind.csv")
+rm(adhesion_angio_bind)
+
+immune_bind <- unique(c(rownames(PROM1.edgeR.p0.05[["MGH101"]]), rownames(PROM1.edgeR.p0.05[["MGH102"]]), rownames(PROM1.edgeR.p0.05[["MGH105"]]),rownames(PROM1.edgeR.p0.05[["MGH106"]]),rownames(PROM1.edgeR.p0.05[["MGH110"]]), rownames(PROM1.edgeR.p0.05[["MGH113"]]),rownames(PROM1.edgeR.p0.05[["MGH115"]]),rownames(PROM1.edgeR.p0.05[["MGH122"]]),rownames(PROM1.edgeR.p0.05[["MGH124"]]),rownames(PROM1.edgeR.p0.05[["MGH125"]]),rownames(PROM1.edgeR.p0.05[["MGH30"]]),rownames(PROM1.edgeR.p0.05[["BT_S6"]]),rownames(PROM1.edgeR.p0.05[["BT786"]]),rownames(PROM1.edgeR.p0.05[["BT920"]])))
+write.table(immune_bind, file= "data/output/figures/PROM1/immune_bind.csv")
+rm(immune_bind)
+
+cycle_bind <- unique(c(rownames(PROM1.edgeR.p0.05[["MGH100"]]), rownames(PROM1.edgeR.p0.05[["BT1160"]])))
+write.table(cycle_bind, file= "data/output/figures/PROM1/cycle_bind.csv")
+rm(cycle_bind)
+```
+
+```{r}
+#enrichment plots from DEGs of high PROM1 cells
+set.seed(6)
+
+BT830_angio_BPGO <- read.csv("data/upload/PROM1/BT830_tops.csv")
+BT_S2_Adhesion_BPGO <- read.csv("data/upload/PROM1/BT_S2_tops.csv")[1:15,]
+BT_S2_Adhesion_KEGG <- read.csv("data/upload/PROM1/BT_S2_tops.csv")[16:22,]
+MGH100_cycle_BPGO <- read.csv("data/upload/PROM1/MGH100_tops.csv")[1:15,]
+MGH100_cycle_KEGG <- read.csv("data/upload/PROM1/MGH100_tops.csv")[16:17,]
+MGH122_immune_BPGO <- read.csv("data/upload/PROM1/MGH122_tops.csv")[1:15,]
+MGH122_immune_KEGG <- read.csv("data/upload/PROM1/MGH122_tops.csv")[16:30,]
+
+b1 <- ggplot(BT830_angio_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+b2 <- ggplot(BT_S2_Adhesion_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+ 
+b3 <- ggplot(BT_S2_Adhesion_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+b23 <- plot_grid(b2,b3, ncol=1, align="v")
+  b23+ggsave("data/output/figures/PROM1/BT_S2_Adhesion_enrich.pdf", width = 8,   height = 6) 
+
+  
+b4 <- ggplot(MGH100_cycle_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="peachpuff4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+ 
+b5 <- ggplot(MGH100_cycle_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="peachpuff4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+b45 <- plot_grid(b4,b5, ncol=1, align="v")
+  b45+ggsave("data/output/figures/PROM1/MGH100_cycle_enrich.pdf", width = 8,   height = 6)  
+  
+
+    
+b6 <- ggplot(MGH122_immune_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="tan3")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+ 
+b7 <- ggplot(MGH122_immune_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="tan3")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+b67 <- plot_grid(b6,b7, ncol=1, align="v")
+  b67+ggsave("data/output/figures/PROM1/MGH122_immune_enrich.pdf", width = 8,   height = 6)   
+  
+rm(b1, b2, b3, b4, b5, b6, b7, b23, b45, b67)
+```
+
+##############################################################################################
+###############################################################################################
+#################################################################################################
+
+
+```{r}
+#PANTHER family frequencies
+set.seed(6)
+
+DE.PROM1.all <- c(rownames(PROM1.edgeR.p0.05[[1]]), rownames(PROM1.edgeR.p0.05[[2]]), rownames(PROM1.edgeR.p0.05[[3]]), rownames(PROM1.edgeR.p0.05[[4]]), rownames(PROM1.edgeR.p0.05[[5]]), rownames(PROM1.edgeR.p0.05[[6]]), rownames(PROM1.edgeR.p0.05[[7]]), rownames(PROM1.edgeR.p0.05[[8]]), rownames(PROM1.edgeR.p0.05[[9]]), rownames(PROM1.edgeR.p0.05[[10]]), rownames(PROM1.edgeR.p0.05[[11]]), rownames(PROM1.edgeR.p0.05[[12]]), rownames(PROM1.edgeR.p0.05[[13]]), rownames(PROM1.edgeR.p0.05[[14]]), rownames(PROM1.edgeR.p0.05[[15]]), rownames(PROM1.edgeR.p0.05[[16]]), rownames(PROM1.edgeR.p0.05[[17]]), rownames(PROM1.edgeR.p0.05[[18]]), rownames(PROM1.edgeR.p0.05[[19]]), rownames(PROM1.edgeR.p0.05[[20]]), rownames(PROM1.edgeR.p0.05[[21]]), rownames(PROM1.edgeR.p0.05[[22]]), rownames(PROM1.edgeR.p0.05[[23]]), rownames(PROM1.edgeR.p0.05[[24]]), rownames(PROM1.edgeR.p0.05[[25]]), rownames(PROM1.edgeR.p0.05[[26]]), rownames(PROM1.edgeR.p0.05[[27]]), rownames(PROM1.edgeR.p0.05[[28]]), rownames(PROM1.edgeR.p0.05[[29]]), rownames(PROM1.edgeR.p0.05[[30]]), rownames(PROM1.edgeR.p0.05[[31]]),rownames(PROM1.edgeR.p0.05[[32]]), rownames(PROM1.edgeR.p0.05[[33]]), rownames(PROM1.edgeR.p0.05[[34]]), rownames(PROM1.edgeR.p0.05[[35]]), rownames(PROM1.edgeR.p0.05[[36]]), rownames(PROM1.edgeR.p0.05[[37]]))
+DE.PROM1 <-as.data.frame(table(DE.PROM1.all))
+write.table(DE.PROM1, file="data/output/figures/PROM1/DE.PROM1.all")
+
+DE.panther <- as.data.frame(read.delim(file="data/text/PROM1/DE_PROM1_panther.csv"))
+
+m1 <- merge(DE.PROM1, DE.panther, by.x = "DE.PROM1.all", by.y = "gene")
+
+m <- c()
+for (i in 1:nrow(m1)){
+  m <- str_sub(c(m, gsub(".*\\((.*)\\).*", "\\1", m1$panther.family[i])), 1, 9)
+}
+
+m1$panther <- m
+panther.freq <-as.data.frame(table(m1$panther))
+
+test <- as.data.table(m1)
+test1 <- test[, list(totalB = sum(Freq), num = .N), by = panther]
+```
+
+
+
+```{r}
+#filter all the marker genes
+set.seed(6)
+
+criteria <- markers.max.PROM1[["BT1160"]][[1]][,5]<0.05&markers.max.PROM1[["BT1160"]][[1]][,3]>2
+test105 <- markers.max.PROM1[["MGH105"]][[1]][criteria,]
+test105$rank <- rank(test105$pvals_adj)
+
+test102 <- markers.max.PROM1[["MGH102"]][[1]][criteria,]
+test102$rank <- rank(test102$pvals_adj)
+
+test122 <- markers.max.PROM1[["MGH122"]][[1]][criteria,]
+test122$rank <- rank(test122$pvals_adj)
+
+test124 <- markers.max.PROM1[["MGH124"]][[1]][criteria,]
+test124$rank <- rank(test124$pvals_adj)
+
+test113 <- markers.max.PROM1[["MGH113"]][[1]][criteria,]
+test113$rank <- rank(test113$pvals_adj)
+
+testBTS2 <- markers.max.PROM1[["BT_S2"]][[1]][criteria,]
+testBTS2$rank <- rank(testBTS2$pvals_adj)
+
+
+test125 <- markers.max.PROM1[["MGH125"]][[1]][criteria,]
+test125$rank <- rank(test125$pvals_adj)
+
+testBT920 <- markers.max.PROM1[["BT920"]][[1]][criteria,]
+testBT920$rank <- rank(testBT920$pvals_adj)
+
+testBT771 <- markers.max.PROM1[["BT771"]][[1]][criteria,]
+testBT771$rank <- rank(testBT771$pvals_adj)
+
+testBT1160 <- markers.max.PROM1[["BT1160"]][[1]][criteria,]
+testBT1160$rank <- rank(testBT1160$pvals_adj)
+```
+
+
+
+
+######################################################################################################
+
+
+
+
+```{r}
+#Distribution test#################################################################
+set.seed(6)
+
+test<- tpm(sce.MGH101.total[,7])
+test<- logcounts(sce.BT_S2.total[,7])
+test1 <- frankv(test, ties.method = "dense")
+logcounts_PROM12_test <- test["PROM1",]
+ggplot(data.frame(test1), aes(x=test1)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=logcounts_PROM12_test,
+             color="red", linetype="dashed", size=1)
+
+logcounts_PROM12 <- logcounts(sce.MGH102.total["PROM1",])
+ggplot(data.frame(t(logcounts_PROM12)), aes(x=PROM1)) +
+  geom_histogram(bins = 100)+
+  #scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_PROM12["PROM1",])-0.75*(max(logcounts_PROM12["PROM1",])-min(logcounts_PROM12["PROM1",])),
+             color="red", linetype="dashed", size=1)
+
+logcounts_PROM12 <- logcounts(sce.MGH124.total["PROM1",])
+high.PROM1 <- logcounts(sce.MGH124.total)[, which(logcounts(sce.MGH124.total["PROM1",])>(max(logcounts_PROM12["PROM1",])-0.75*(max(logcounts_PROM12["PROM1",])-min(logcounts_PROM12["PROM1",]))))]
+
+ggplot(data.frame(t(high.PROM1)), aes(x=ITGAX)) +
+  geom_histogram(bins = 100)
+###################################################################################
+
+sce.high.PROM1 <- sce.MGH124.total[, which(logcounts(sce.MGH124.total["PROM1",])>(max(logcounts_PROM12["PROM1",])-0.75*(max(logcounts_PROM12["PROM1",])-min(logcounts_PROM12["PROM1",]))))]
+genes.MGH124 <- row.names(counts(sce.high.PROM1))
+sce.high.PROM1 <- dimension.reduction(genes.MGH124, sce.high.PROM1)
+
+plotReducedDim(sce.high.PROM1, dimred="UMAP", colour_by ="PROM1")
+
+```
+
+```{r}
+set.seed(6)
+
+logcounts_immu <- logcounts(sce.MGH102.total["C1QA",])
+ggplot(data.frame(t(logcounts_immu)), aes(x=C1QA)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_immu["C1QA",])-0.75*(max(logcounts_immu["C1QA",])-min(logcounts_immu["C1QA",])),
+             color="red", linetype="dashed", size=1)
+```
+
+
+
+
+
+```{r}
+#INTERESTED GENES##############################################################################
+set.seed(6)
+
+# source("code/R/Darmanis/interested_genes.R")
+# genes <- row.names(counts(sce.total))
+genes.BT_S2 <- row.names(counts(sce.BT_S2.total))
+genes.BT_S1 <- row.names(counts(sce.BT_S1.total))
+genes.BT_S4 <- row.names(counts(sce.BT_S4.total))
+genes.BT_S6 <- row.names(counts(sce.BT_S6.total))
+genes.BT1187 <- row.names(counts(sce.BT1187.total))
+genes.MGH122 <- row.names(counts(sce.MGH122.total))
+genes.MGH105 <- row.names(counts(sce.MGH105.total))
+genes.BT830 <- row.names(counts(sce.BT830.total))
+genes.MGH106 <- row.names(counts(sce.MGH106.total))
+genes.MGH110 <- row.names(counts(sce.MGH110.total))
+
+```
+
+```{r}
+#DIMENSION REDUCTION ON EACH PATIENT CELLS######################################################
+set.seed(6)
+
+source("code/R/Darmanis/dimension_reduction.R")
+
+sce.BT_S2.total <- dimension.reduction(genes.BT_S2, sce.BT_S2.total)
+sce.BT_S1.total <- dimension.reduction(genes.BT_S1, sce.BT_S1.total)
+sce.BT_S4.total <- dimension.reduction(genes.BT_S4, sce.BT_S4.total)
+sce.BT_S6.total <- dimension.reduction(genes.BT_S6, sce.BT_S6.total)
+sce.BT1187.total <- dimension.reduction(genes.BT1187, sce.BT1187.total)
+sce.MGH122.total <- dimension.reduction(genes.MGH122, sce.MGH122.total)
+sce.MGH105.total <- dimension.reduction(genes.MGH105, sce.MGH105.total)
+sce.BT830.total <- dimension.reduction(genes.BT830, sce.BT830.total)
+sce.MGH110.total <- dimension.reduction(genes.MGH110, sce.MGH110.total)
+
+
+plotReducedDim(sce.MGH110.total, dimred="TSNE", colour_by ="PROM1", point_size=5)+
+  ggsave(paste("data/output/figures/PROM1/mgh122_tsne.pdf"), width = 8,  height = 6)
+
+for (i in 1: length(dataList)){
+  dataList[[i]] <- dimension.reduction(row.names(counts(dataList[[i]])), dataList[[i]])
+
+  #write.table(result3, file= paste("data/output/figures/PROM1/DE_PROM1/",names(dataList[i]), sep=""))
+  plotReducedDim(dataList[[i]], dimred="TSNE", colour_by ="PROM1", point_size=5)+
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 30),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 30),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 30),
+        legend.key.size = unit(0.8, "cm"))+ 
+  ggsave(paste("data/output/figures/PROM1/tsne/", names(dataList[i]), ".pdf",sep = ""), width = 8,  height = 6)
+}
+
+```
+
+
+
+
+
+
+```{r}
+set.seed(6)
+
+PROM1 <-  c(logcounts(sce.BT_S1.total["PROM1",])) 
+
+TP53 <- c(logcounts(sce.BT_S2.total["TP53",]))
+CRY1 <- c(logcounts(sce.BT_S2.total["CRY1",]))
+CRY2 <-  c(logcounts(sce.BT_S2.total["CRY2",])) 
+POLR2A <- c(logcounts(sce.BT_S2.total["POLR2A",]))
+HDAC1 <-  c(logcounts(sce.BT_S2.total["HDAC1",])) 
+SOX2 <-  c(logcounts(sce.BT_S2.total["SOX2",])) 
+CTNNB1 <-  c(logcounts(sce.BT_S2.total["CTNNB1",])) 
+
+
+test <- data.frame(SOX2, PROM1)
+ggplot(test, aes(x=SOX2, y=PROM1)) + 
+  geom_point()
+
+logcounts_PROM12 <- logcounts(sce.BT_S2.total["PROM1",])
+ggplot(data.frame(t(logcounts_PROM12)), aes(x=PROM1)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_PROM12["PROM1",])-0.75*(max(logcounts_PROM12["PROM1",])-min(logcounts_PROM12["PROM1",])),
+             color="red", linetype="dashed", size=1)
+
+factor_test2 <- factor(logcounts(sce.BT_S2.total["PROM1",]) > max(logcounts_PROM12["PROM1",])-0.75*(max(logcounts_PROM12["PROM1",])-min(logcounts_PROM12["PROM1",])))
+
+logcounts_PROM11 <- logcounts(sce.BT_S1.total["PROM1",])
+ggplot(data.frame(t(logcounts_PROM11)), aes(x=PROM1)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_PROM11["PROM1",])-0.75*(max(logcounts_PROM11["PROM1",])-min(logcounts_PROM11["PROM1",])),
+             color="red", linetype="dashed", size=1)
+
+
+library(MAST)
+fData <- data.frame(names = rownames(logcounts(sce.BT_S2.total)))
+rownames(fData) <- rownames(logcounts(sce.BT_S2.total))
+cData <- data.frame(cond = factor_test2)
+rownames(cData) <- colnames(logcounts(sce.BT_S2.total))
+
+obj <- FromMatrix(as.matrix(logcounts(sce.BT_S2.total)), cData, fData)
+#colData(obj)$cngeneson <- scale(colSums(assay(obj) > 0))
+cond <- factor(colData(obj)$cond)
+
+# Model expression as function of condition & number of detected genes
+zlmCond <- zlm(~ cond, obj) 
+summaryCond <- summary(zlmCond)
+summaryDt <- summaryCond$datatable
+
+
+source("/home/hdd/yue/code/R/Neftel/edgeR.R")
+result6_PROM1_edgeR <- edgeR(sce.BT_S6.total, "PROM1")
+write.table(result6_PROM1_edgeR, file="/home/hdd/yue/data/output/result6_PROM1_edgeR")
+
+```
+
+
+
+```{r}
+#CENTERING THE CELLS##############################################################################
+set.seed(6)
+
+all.genes <- row.names(sce.BT_S2.total)
+BT_S2.seurat <- as.Seurat(sce.BT_S2.total, counts = "counts", data = "logcounts")
+BT_S2.seurat <- ScaleData(BT_S2.seurat, features = all.genes)
+test2 <- BT_S2.seurat@assays[["RNA"]]@scale.data
+
+ggplot(data.frame(PROM1 = test2["PROM1",]), aes(x=PROM1)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=0.25*max(test2["PROM1",]),
+             color="red", linetype="dashed", size=1)
+
+selected_2 <- test2[,test2["PROM1",] > 0.25*max(test2["PROM1",])]
+omited_2 <- test2[, test2["PROM1",] <= 0.25*max(test2["PROM1",])]
+#####################################################################################################
+```

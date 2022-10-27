@@ -1,0 +1,298 @@
+---
+title: "Darmanis_normal_main"
+author: "Yue He"
+date: "11/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '~/hdd/yue')
+library(reticulate)
+use_python("/home/yue/miniconda3/bin/python3", required = TRUE)
+```
+
+
+```{python}
+# This is just a test to see if python is working properly
+import sys
+print(sys.executable)
+import scanpy as sc
+```
+
+
+```{r}
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(msigdbr)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(uwot)
+library(Rtsne)
+library(PCAtools)
+library("RColorBrewer")
+library(d3heatmap)
+library(stringr)
+```
+
+
+```{r}
+#load_data
+assign_names <- function(dir1, dir2) {
+  geneNames <- read.csv(dir1, header = TRUE) 
+  rawMatrix <- read.table(dir2, header = TRUE)
+  raw1Matrix <- left_join(geneNames, rawMatrix,  by = c("ensembl_gene_id"="gene_id")) 
+  cMatrix <- na.omit(raw1Matrix)
+  countMatrix <- cMatrix[, -1]
+  
+  
+  #aggregate rows that have the same gene names
+  #countMatrix <- aggregate(x = countMatrix[-1], by = list(countMatrix$gene), FUN = sum)
+  return(countMatrix)
+}
+countMatrix_GT <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", "/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/countMatrix_Darmanis_normal_combined")
+write.table(countMatrix_GT, file="/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_normal_combined_CM")
+
+
+normal <- read.table("/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_normal_combined_CM")[, -c(2:467)]
+neo <- read.table("/home/yue/hdd/yue/data/CM/Darmanis/countMatrix_S")
+total <- merge(normal, neo, by="external_gene_name" ,sort=FALSE)
+write.table(total, file = "/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_all_CM")
+rm(normal, neo, total)
+```
+
+
+
+```{r}
+#load data############################################################################
+source("/home/yue/hdd/yue/code/R/ID132/load_data.R")
+sce_Darmanis_compare <-load.data.GT("/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_all_CM", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Darmanis/Darmanis_neo_all.txt")
+
+
+```
+
+```{r}
+#QC#######################################################################################################################
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(SingleCellExperiment)
+#isSpike(sce_Darmanis_compare, "ERCC") <- grepl("^ERCC-", rownames(sce_Darmanis_compare))
+isSpike(sce_Darmanis_compare, "MT") <- rownames(sce_Darmanis_compare) %in% c("MT-TF",   "MT-RNR1", "MT-TV", "MT-RNR2", "MT-TL1",  "MT-ND1", 
+                                           "MT-TI",   "MT-TQ",   "MT-TM",  "MT-ND2",  "MT-TW",  "MT-TA",   
+                                           "MT-TN",   "MT-TC",  "MT-TY" ,  "MT-CO1",  "MT-TS1",  "MT-TD",
+                                           "MT-CO2",  "MT-TK",   "MT-ATP8", "MT-ATP6", "MT-CO3",  "MT-TG",   
+                                           "MT-ND3",  "MT-TR",   "MT-ND4L", "MT-ND4",  "MT-TH",   "MT-TS2",
+                                           "MT-TL2",  "MT-ND5",  "MT-ND6", "MT-TE",   "MT-CYB",  "MT-TT", "MT-TP")
+
+sce_Darmanis_compare <- calculateQCMetrics(
+  sce_Darmanis_compare,
+  feature_controls = list(
+    MT = isSpike(sce_Darmanis_compare, "MT")
+  )
+)
+```
+
+
+```{r}
+#pre-processing plot #######################################################################################
+hist(
+  sce_Darmanis_compare$total_counts,
+  breaks = 100
+)
+abline(v = 25000, col = "red")
+
+hist(
+  sce_Darmanis_compare$total_features_by_counts, 
+  xlab = "Number of detected genes", labels = FALSE,
+  main = "Darmanis_normal",
+  breaks = 100
+)
+abline(v = 4000, col = "red")
+
+plotColData(
+  sce_Darmanis_compare,
+  x = "total_features_by_counts",
+  y = "pct_counts_MT"
+)
+```
+
+
+```{r}
+set.seed(6)
+source("/home/yue/hdd/yue/code/R/ID132/pre_processing_lib.R")
+sce.BT_S2.compare <- pre.processing.lib(subset(sce_Darmanis_compare, , Patient_ID=="BT_S2"))
+sce.BT_S1.compare <- pre.processing.lib(subset(sce_Darmanis_compare, , Patient_ID=="BT_S1"))
+sce.BT_S4.compare <- pre.processing.lib(subset(sce_Darmanis_compare, , Patient_ID=="BT_S4"))
+sce.BT_S6.compare <- pre.processing.lib(subset(sce_Darmanis_compare, , Patient_ID=="BT_S6"))
+```
+
+
+```{r}
+#import all.stem.genes
+set.seed(6)
+all.stem.genes <- read.table("/home/yue/hdd/yue/data/output/figures/PROM1/all.stem.genes")
+all.stem.genes["frequencies"] <- all.stem.genes["frequencies"]*100/35
+
+```
+
+
+```{r}
+#Get dataList for all the SingleCellExperiment (Here you need to run the main_plaur_cluster.r script to the dataList part)
+dataList0 <- mget(ls(pattern = '*.compare'))
+dataList <- dataList0[c("sce.BT_S1.compare", "sce.BT_S2.compare", "sce.BT_S4.compare","sce.BT_S6.compare")]
+rm(dataList0, sce.BT_S1.compare, sce.BT_S2.compare, sce.BT_S4.compare, sce.BT_S6.compare)
+```
+
+
+
+```{r}
+set.seed(6)
+
+source("/home/yue/hdd/yue/code/R/Darmanis_normal/edgeR.R")
+
+
+compare.edgeR.p0.05 <- list()
+for (i in 1: length(dataList)){
+  result1 <- edgeR(dataList[[i]])
+  result2 <- result1[result1$FDR < 0.05, ]
+  result3 <- result2[result2$logFC > 2, ]
+  compare.edgeR.p0.05 <- list.append(compare.edgeR.p0.05, result3)
+  setDT(compare.edgeR.p0.05[[i]], keep.rownames=TRUE)
+  colnames(compare.edgeR.p0.05[[i]])[1] <- "names"
+  names(compare.edgeR.p0.05)[i]<- str_sub(names(dataList[i]), 5, -7)
+}
+rm(result1, result2, result3)
+```
+
+```{r}
+# DEG between normal and cancer
+set.seed(6)
+
+DEG.compare <- list(BT_S1=compare.edgeR.p0.05[["BT_S1.c"]], BT_S2=compare.edgeR.p0.05[["BT_S2.c"]], BT_S4 = compare.edgeR.p0.05[["BT_S4.c"]], BT_S6 = compare.edgeR.p0.05[["BT_S6.c"]])
+rm(compare.edgeR.p0.05)
+
+```
+
+```{r}
+#find marker plot 
+#top 200 markers rank
+set.seed(6)
+
+top_200.DEG <- data.frame()
+for (i in (1:length(DEG.compare))){
+  x <- DEG.compare[[i]][frank(DEG.compare[[i]]$FDR) <= 200,]
+  top_200.DEG <- list.append(top_200.DEG, x)
+  top_200.DEG[[i]]$FDR_rank <- frank(top_200.DEG[[i]]$FDR)*100/nrow(top_200.DEG[[i]])
+  names(top_200.DEG)[i]<-  names(DEG.compare)[i]
+  
+}
+
+
+all.DEG.genes <- c()
+for (i in (1:length(top_200.DEG))){
+  all.DEG.genes <- rbind(all.DEG.genes, top_200.DEG[[i]][, c(-2:-5)])
+  
+}
+freq <- as.data.frame(table(all.DEG.genes$names))
+colnames(freq) <- c("names", "frequencies")
+
+all.DEG.genes <- aggregate(all.DEG.genes$FDR_rank,
+          list(all.DEG.genes$names),
+          median)
+colnames(all.DEG.genes) <- c("names", "pval_median")
+
+all.DEG.genes <- merge(all.DEG.genes, freq, by = "names", all = T)
+colnames(all.DEG.genes) <- c("names", "pval_rank_median", "frequencies")
+all.DEG.genes["frequencies"] <- all.DEG.genes["frequencies"]*100/4
+
+#write.table(all.DEG.genes, file="/home/yue/hdd/yue/data/output/figures/PROM1/all.DEG.800genes")
+all.DEG.selected <- all.DEG.genes[all.DEG.genes$freq>5,]
+```
+
+
+```{r}
+#Get intersecting genes on all.stem.genes plot
+set.seed(6)
+
+stem.DEG.intersect <- subset(all.DEG.genes,(names%in%all.stem.genes$names))
+colnames(stem.DEG.intersect) <- c("names", "pval_ranks_median_intersect", "frequencies_intersect")
+stem.DEG.all <- merge(all.stem.genes, stem.DEG.intersect, by = "names", all = T)####stem.DEG.all[is.na(stem.DEG.all)] = 0
+
+#Get intersecting genes on all.DEG.genes plot
+DEG.stem.intersect <- subset(all.stem.genes,(names%in%all.DEG.genes$names))
+colnames(DEG.stem.intersect) <- c("names", "pval_ranks_median_intersect", "frequencies_intersect")
+DEG.stem.all <- merge(all.DEG.genes, DEG.stem.intersect, by = "names", all = T)
+
+```
+
+```{r}
+#plot together in stem figure
+set.seed(6)
+
+ggplot(all.stem.genes, aes(x=all.stem.genes$pval_rank_median,y=all.stem.genes$frequencies))+ 
+  geom_point(alpha=1, size = 1)+
+  geom_text_repel(data=subset(all.stem.genes, frequencies > 35), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+
+  ggsave(paste("/home/yue/hdd/yue/data/output/figures/PROM1/find_markers.pdf"), width = 8,  height = 6)
+
+#stem markers plot##########################################################################################
+ggplot() +
+  geom_point(data=stem.DEG.all, aes(pval_rank_median, frequencies, size = frequencies_intersect, color=pval_ranks_median_intersect), alpha = 2/3) +
+  scale_size_continuous(range = c(4,10))+
+  geom_text_repel(data=subset(stem.DEG.all, frequencies > 40), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  geom_text_repel(data=subset(stem.DEG.all, !is.na(stem.DEG.all$frequencies_intersect)&stem.DEG.all$frequencies>10&stem.DEG.all$pval_rank_median<50), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names)) +
+  geom_point(data=stem.DEG.all[is.na(stem.DEG.all$frequencies_intersect),], aes(pval_rank_median, frequencies),  shape=4)+
+  theme_minimal()+
+  ggsave(paste("/home/yue/hdd/yue/data/output/figures/PROM1/find_markers_DEG_intersect.pdf"), width = 8,  height = 6)
+
+#DEG markers plot#No need for this plot#####################################################################
+ggplot() +
+  geom_point(data=DEG.stem.all, aes(pval_rank_median, frequencies, size = frequencies_intersect, color=pval_ranks_median_intersect), alpha = 2/3) +
+  scale_size_continuous(range = c(4,10))+
+  geom_text_repel(data=subset(DEG.stem.all, frequencies > 40), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  geom_text_repel(data=subset(DEG.stem.all, !is.na(DEG.stem.all$frequencies_intersect)&DEG.stem.all$frequencies>10&DEG.stem.all$pval_rank_median<50), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names)) +
+  geom_point(data=DEG.stem.all[is.na(DEG.stem.all$frequencies_intersect),], aes(pval_rank_median, frequencies),  shape=4)+
+  theme_minimal()
+
+```
+
+
+
+

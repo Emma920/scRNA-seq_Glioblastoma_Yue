@@ -1,0 +1,1228 @@
+---
+title: "main_plaur_ranks_md"
+author: "Yue He"
+date: "5/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '~/hdd/yue')
+library(reticulate)
+use_python("/home/yue/miniconda3/bin/python3", required = TRUE)
+```
+
+
+```{python}
+# This is just a test to see if python is working properly
+import sys
+print(sys.executable)
+import scanpy as sc
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{r}
+suppressPackageStartupMessages({
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(msigdbr)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(uwot)
+library(Rtsne)
+library(PCAtools)
+library(rlist)
+library("RColorBrewer")
+#library(d3heatmap)
+#library(Seurat)
+})
+
+#LOAD FILES####################################################################################
+#source("code/R/Darmanis/load_files.R")
+#countMatrix <- knit_aggregate("/home/hdd/yue/data/aligned/Darmanis/kallisto/", "*.tsv")
+#write.table(countMatrix, file="/home/hdd/yue/data/CM/Darmanis/countMatrix")
+
+#source("/home/hdd/yue/code/R/Darmanis/load_STARfiles.R")
+#countMatrix_S <- knit_STARaggregate("/home/hdd/yue/data/aligned/Darmanis/STAR/", "*ReadsPerGene.out.tab")
+#write.table(countMatrix_S, file="/home/hdd/yue/data/CM/Darmanis/countMatrix_S")
+
+#LOAD DATA#####################################################################################
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing_lib.R")
+source("/home/yue/hdd/yue/code/R/Neftel/pre_processing_Neftel.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data_Neftel.R")
+
+sce <-load.data("/home/yue/hdd/yue/data/CM/Darmanis/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Darmanis/neo_metadata.csv" )
+sceP <-load.data("/home/yue/hdd/yue/data/CM/Patel/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Patel/Patel_meta.csv" )
+sceN <-load.data.Neftel("/home/yue/hdd/yue/data/CM/Neftel/GSM3828672_Smartseq2_GBM_IDHwt_processed_TPM.tsv", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Neftel/meta_Neftel.csv" )
+sceN@assays@data@listData[["counts"]]<-sceN@assays@data@listData[["tpm"]]
+sceN <- pre.processing.Neftel(sceN)
+sceN@assays@data@listData[["logcounts"]]<-sceN@assays@data@listData[["tpm"]]
+
+###############################################################################################
+```
+
+```{r}
+
+#WITH EACH PATIENT#############################################################################
+#Darmanis
+sce.BT_S2.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S2"))
+sce.BT_S1.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S1"))
+sce.BT_S4.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S4"))
+sce.BT_S6.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S6"))
+
+#Patel
+sce.MGH26.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH26"))
+sce.MGH28.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH28"))
+sce.MGH29.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH29"))
+sce.MGH30.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH30"))
+sce.MGH31.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH31"))
+
+#Neftel
+sce.MGH101.total <- subset(sceN, , tumour.name=="MGH101")
+sce.MGH100.total <- subset(sceN, , tumour.name=="MGH100")
+sce.MGH102.total <- subset(sceN, , tumour.name=="MGH102")
+sce.MGH104.total <- subset(sceN, , tumour.name=="MGH104")
+sce.MGH105.total <- subset(sceN, , tumour.name=="MGH105")
+sce.MGH106.total <- subset(sceN, , tumour.name=="MGH106")
+sce.MGH110.total <- subset(sceN, , tumour.name=="MGH110")
+sce.MGH113.total <- subset(sceN, , tumour.name=="MGH113")
+sce.MGH115.total <- subset(sceN, , tumour.name=="MGH115")
+sce.MGH121.total <- subset(sceN, , tumour.name=="MGH121")
+sce.MGH122.total <- subset(sceN, , tumour.name=="MGH122")
+sce.MGH124.total <- subset(sceN, , tumour.name=="MGH124")
+sce.MGH125.total <- subset(sceN, , tumour.name=="MGH125")
+sce.BT749.total <- subset(sceN, , tumour.name=="BT749")
+sce.BT771.total <- subset(sceN, , tumour.name=="BT771")
+sce.BT830.total <- subset(sceN, , tumour.name=="BT830")
+sce.MGH85.total <- subset(sceN, , tumour.name=="MGH85")
+sce.BT1160.total <- subset(sceN, , tumour.name=="BT1160")
+sce.BT1187.total <- subset(sceN, , tumour.name=="BT1187")
+sce.BT786.total <- subset(sceN, , tumour.name=="BT786")
+sce.BT920.total <- subset(sceN, , tumour.name=="BT920")
+sce.MGH128.total <- subset(sceN, , tumour.name=="MGH128")
+sce.MGH129.total <- subset(sceN, , tumour.name=="MGH129")
+sce.MGH136.total <- subset(sceN, , tumour.name=="MGH136")
+sce.MGH143.total <- subset(sceN, , tumour.name=="MGH143")
+sce.MGH151.total <- subset(sceN, , tumour.name=="MGH151")
+sce.MGH152.total <- subset(sceN, , tumour.name=="MGH152")
+sce.MGH66.total <- subset(sceN, , tumour.name=="MGH66")
+
+#Clusting############################################################################
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting.R")
+sce.BT_S2.total@colData@listData[["label"]] <- clusting(sce.BT_S2.total)
+sce.BT_S1.total@colData@listData[["label"]] <- clusting(sce.BT_S1.total)
+sce.BT_S4.total@colData@listData[["label"]] <- clusting(sce.BT_S4.total)
+sce.BT_S6.total@colData@listData[["label"]] <- clusting(sce.BT_S6.total)
+sce.MGH26.total@colData@listData[["label"]] <- clusting(sce.MGH26.total)
+sce.MGH28.total@colData@listData[["label"]] <- clusting(sce.MGH28.total)
+sce.MGH29.total@colData@listData[["label"]] <- clusting(sce.MGH29.total)
+sce.MGH30.total@colData@listData[["label"]] <- clusting(sce.MGH30.total)
+sce.MGH31.total@colData@listData[["label"]] <- clusting(sce.MGH31.total)
+
+
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting_tpm.R")
+sce.MGH101.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH101.total)
+sce.MGH100.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH100.total)
+sce.MGH102.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH102.total)
+sce.MGH104.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH104.total)
+sce.MGH105.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH105.total)
+sce.MGH106.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH106.total)
+sce.MGH110.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH110.total)
+sce.MGH113.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH113.total)
+sce.MGH115.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH115.total)
+sce.MGH121.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH121.total)
+sce.MGH122.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH122.total)
+sce.MGH124.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH124.total)
+sce.MGH125.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH125.total)
+sce.BT749.total@colData@listData[["label"]] <- clusting.tpm(sce.BT749.total)
+sce.BT771.total@colData@listData[["label"]] <- clusting.tpm(sce.BT771.total)
+sce.BT830.total@colData@listData[["label"]] <- clusting.tpm(sce.BT830.total)
+sce.MGH85.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH85.total)
+sce.BT1160.total@colData@listData[["label"]] <- clusting.tpm(sce.BT1160.total)
+sce.BT1187.total@colData@listData[["label"]] <- clusting.tpm(sce.BT1187.total)
+sce.BT786.total@colData@listData[["label"]] <- clusting.tpm(sce.BT786.total)
+sce.BT920.total@colData@listData[["label"]] <- clusting.tpm(sce.BT920.total)
+sce.MGH128.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH128.total)
+sce.MGH129.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH129.total)
+sce.MGH136.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH136.total)
+sce.MGH143.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH143.total)
+sce.MGH151.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH151.total)
+sce.MGH152.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH152.total)
+sce.MGH66.total@colData@listData[["label"]] <- clusting.tpm(sce.MGH66.total)
+rm(sce, sceN, sceP)
+
+```
+
+
+```{r}
+#Get dataList for all the SingleCellExperiment (Here you need to run the main_plaur_cluster.r script to the dataList part)
+dataList0 <- mget(ls(pattern = '*.total'))
+dataList <- dataList0[c("sce.BT_S1.total", "sce.BT_S2.total", "sce.BT_S4.total","sce.BT_S6.total","sce.MGH26.total","sce.MGH28.total",
+                        "sce.MGH29.total","sce.MGH30.total","sce.MGH31.total","sce.BT749.total","sce.BT771.total","sce.BT786.total",                                "sce.BT830.total","sce.BT920.total","sce.BT1160.total","sce.BT1187.total","sce.MGH66.total","sce.MGH85.total",
+                        "sce.MGH100.total","sce.MGH101.total","sce.MGH102.total","sce.MGH104.total","sce.MGH105.total","sce.MGH106.total",
+                        "sce.MGH110.total","sce.MGH113.total","sce.MGH115.total","sce.MGH121.total","sce.MGH122.total","sce.MGH124.total",
+                        "sce.MGH125.total","sce.MGH128.total","sce.MGH129.total","sce.MGH136.total","sce.MGH143.total","sce.MGH151.total",
+                        "sce.MGH152.total")]
+
+rm(sce.BT_S1.total, sce.BT_S2.total, sce.BT_S4.total, sce.BT_S6.total, sce.MGH26.total, sce.MGH28.total, sce.MGH29.total, sce.MGH30.total, sce.MGH31.total, sce.MGH66.total, sce.MGH85.total, sce.BT1160.total, sce.BT1187.total, sce.BT749.total, sce.BT771.total, sce.BT786.total, sce.BT830.total, sce.BT920.total, sce.MGH100.total, sce.MGH101.total, sce.MGH102.total, sce.MGH104.total, sce.MGH105.total, sce.MGH106.total, sce.MGH110.total, sce.MGH113.total, sce.MGH115.total, sce.MGH121.total, sce.MGH122.total, sce.MGH124.total, sce.MGH125.total, sce.MGH128.total, sce.MGH129.total, sce.MGH136.total, sce.MGH143.total, sce.MGH151.total, sce.MGH152.total)
+
+```
+
+
+```{r}
+#Calculate ranks#################################################################
+
+ranks.per.gene <- function(x) {
+  y <- frank(replace(x,x==0,NA), ties.method = "average", na.last = "keep")*100/sum(x!=0)
+  rownames(y)<- rownames(x)
+  return(y)
+}
+
+
+for (i in 1:length(dataList)){
+  
+  dataList[[i]]@assays@data@listData[["ranks"]]<-apply(logcounts(dataList[[i]]), 2, ranks.per.gene)
+  rownames(dataList[[i]]@assays@data@listData[["ranks"]]) <- rownames(logcounts(dataList[[i]]))
+}
+
+#length(which(is.na(x["PLAUR"])))*100/nrow(x)
+
+```
+
+
+
+
+```{r}
+###################################################################################
+#Make stacks
+
+plaur_ranks <- data.frame()
+for (i in (1:length(dataList))){
+  c1 <- data.frame(PLAUR= dataList[[i]]@assays@data@listData[["ranks"]]["PLAUR",], patient_ID=str_sub(names(dataList[i]), 5, -7))
+  plaur_ranks <- na.omit(rbind(plaur_ranks, c1))
+  
+}
+
+plaur_ranks$author <- as.factor(c(rep("Darmanis", 137), rep("Patel", 127), rep("Neftel", 1348)))
+plaur_ranks$patient_ID <- as.factor(plaur_ranks$patient_ID)
+plaur_ranks$patientID <- as.factor(paste0(str_sub(plaur_ranks$author, 1,1),                   c(as.numeric(plaur_ranks[plaur_ranks$author=="Darmanis",]$patient_ID),       as.numeric(plaur_ranks[plaur_ranks$author=="Patel",]$patient_ID)-4,                   as.numeric(plaur_ranks[plaur_ranks$author=="Neftel",]$patient_ID)-9)))
+
+write.table(plaur_ranks, file="/home/yue/hdd/yue/data/output/figures/plaur/plaur_ranks.csv")
+
+
+percentages <- data.frame()
+
+for (i in (1:length(dataList))){
+  c1 <- data.frame(PLAUR= dataList[[i]]@assays@data@listData[["ranks"]]["PLAUR",], patient_ID=str_sub(names(dataList[i]), 5, -7))
+  p1 <- c(non_zero=100-length(which(is.na(c1["PLAUR"])))*100/nrow(c1))
+  percentages <- rbind(percentages, p1)
+  
+}
+rm(c1,p1)
+colnames(percentages) <- "non_zero_percentage"
+percentages$author <- as.factor(c(rep("Darmanis", 4), rep("Patel", 5), rep("Neftel", 28)))
+percentages$patient_ID <- as.factor(str_sub(names(dataList), 5, -7))
+percentages$patientID <- as.factor(paste0(str_sub(percentages$author, 1,1), c(1,2,3,4,1,2,3,4,5,1:28)))
+percentages$colors <- c(rep("peachpuff4",4), rep("wheat2", 5), rep("lightsteelblue3", 28))
+
+
+
+```
+
+
+```{r}
+library(ggplot2)
+
+a <- ggplot(plaur_ranks, aes(x=reorder(patient_ID,PLAUR, FUN=median), y=PLAUR, fill=author)) + 
+  geom_boxplot()+ 
+  scale_fill_manual(values=c("#7fc97f", "#beaed4", "#fdc086"))+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1, size = 10),
+                                                                       axis.text.y = element_text(size = 10))
+
+
+library(forcats)
+b <- ggplot(percentages, aes(x=reorder(patient_ID,non_zero_percentage), y=non_zero_percentage, fill=author)) + 
+  geom_bar(stat="identity", alpha=0.5,  colour="black")+
+  scale_fill_manual(values=c("#7fc97f", "#beaed4", "#fdc086"))+ 
+  scale_y_continuous(breaks=c(0,10,20,30,40,50, 60)) +  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1, size = 10), axis.text.y = element_text(size = 10))
+
+
+
+library(ggpubr)
+ggarrange(a+ rremove("xlab"),  b, 
+          #labels = c("A", "B"),
+          ncol = 1, nrow = 2, align = "v")+ggsave(paste("data/output/figures/plaur/ranks_percentages.pdf"), width = 8,  height = 6)
+
+#whitney-U test###########################################################################
+test2 <- percentages[which(percentages$author=="Darmanis"), "non_zero_percentage"]
+test1 <- percentages[which(percentages$author=="Patel"), "non_zero_percentage"]
+
+wilcox.test(test1,test2)
+
+
+#plot the relationship of ranks and the percentages###########################################
+percentages$median_rank <- tapply(plaur_ranks$PLAUR, plaur_ranks$patient_ID, median)
+q <- ggplot(nonzero_percentages, aes(x=percentage, y=median_rank, color=author))+ 
+  scale_color_manual(values=c("#7fc97f", "#beaed4", "#fdc086"))+
+  geom_point(alpha=1, size = 5)+
+  geom_vline(xintercept=16, color="red", linetype="dashed", size=1)+
+  geom_hline(yintercept=63, color="red", linetype="dashed", size=1)+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618) 
+
+#If I want to reorder according to ranks#################################################
+#x_order <- c("MGH85", "MGH31", "BT749", "MGH110", "MGH26", "MGH143", "MGH29", "BT_S4", "MGH128", "BT_S1", "MGH28", "BT830", "MGH30", "MGH121",
+ #            "MGH66", "MGH151", "MGH104", "MGH136", "MGH129", "BT786", "MGH101", "BT_S2", "BT_S6", "BT1160","MGH106", "MGH152", "BT920", "BT771", "MGH115", "MGH125", "BT1187", "MGH100", "MGH124", "MGH105", "MGH113", "MGH102", "MGH122")
+#percentages$patient_ID <- factor(percentages$patient_ID, levels=x_order)
+
+#plotting stuff####################################################################
+#theme(legend.position = "top")#"peachpuff4", "lightsteelblue3", "wheat2"
+#scale_fill_brewer(palette="RdBu")+ theme_minimal()
+#scale_fill_brewer(palette="GrandBudapest2") + theme_minimal()
+#geom_jitter(shape=16, position=position_jitter(0.2)) 
+
+#999999  "#66c2a5", "#8da0cb", "#fc8d62" "grey77"
+#E69F00 "peachpuff2", "lightsteelblue3", "darkseagreen3"
+#56B4E9 salmon2  darkseagreen2 snow3  peachpuff4 wheat2 snow3 lightsteelblue3
+
+# ggplot(percentages, aes(x=patientID, y=percentage, fill=zeros, color=author)) + 
+#   geom_bar(stat="identity", alpha=0.5, size=1)+ 
+#   scale_fill_manual(values=c("grey64", "grey90")) +
+#   scale_color_manual(values=c("#7fc97f", "#beaed4", "#fdc086"))+ theme_minimal()
+###################################################################################
+
+```
+
+
+```{r}
+#amount and percentage of cells expressing PLAUR from each cluster, all patients, the list###############################
+plaur.clusters <- list()
+for (i in 1:(length(dataList))){
+  library(rlist)
+  df <- data.frame(clusters =c(), 
+                   cells_expressing=c(),
+                   cells_total=c(),
+                   percentages=c())
+  for (j in 1: length(sort(unique(dataList[[i]]@colData@listData[["label"]])))){
+    df0 <- data.frame(clusters =c(sort(unique(dataList[i][[names(dataList[i])]]@colData@listData[["label"]]))[j]), 
+                      cells_expressing=length(which(logcounts(dataList[i][[names(dataList[i])]]["PLAUR",dataList[i][[names(dataList[i])]]@colData@listData[["label"]]==j])!=0)),
+                      cells_total=ncol(logcounts(dataList[i][[names(dataList[i])]]["PLAUR",dataList[i][[names(dataList[i])]]@colData@listData[["label"]]==j])),
+                      percentages=length(which(logcounts(dataList[i][[names(dataList[i])]]["PLAUR",dataList[i][[names(dataList[i])]]@colData@listData[["label"]]==j])!=0))*100/ncol(logcounts(dataList[i][[names(dataList[i])]]["PLAUR",dataList[i][[names(dataList[i])]]@colData@listData[["label"]]==j])))
+    df <- rbind(df,df0)
+    #assign(str_sub(names(dataList[i]), -11, -7), df)
+  }
+  plaur.clusters <- list.append(plaur.clusters, df)
+  names(plaur.clusters)[i]<- str_sub(names(dataList[i]), 5, -7)
+  
+}
+rm(df, df0, dataList0 )
+
+```
+
+
+
+```{r}
+#plaur expression value of each cluster all patients, the list###########################################################
+plaur.expression <- list()
+for (i in 1:(length(dataList))){
+  library(rlist)
+  df <- data.frame(expression_level=logcounts(dataList[i][[names(dataList[i])]])["PLAUR",],
+                      cluster=as.factor(dataList[i][[names(dataList[i])]]@colData@listData[["label"]]))
+
+    #assign(str_sub(names(dataList[i]), -11, -7), df)
+  plaur.expression <- list.append(plaur.expression, df)
+  names(plaur.expression)[i]<- str_sub(names(dataList[i]), 5, -7)
+  
+}
+```
+
+```{r}
+#violin plot
+#ggplot(plaur.expression[["MGH105"]], #aes(x=plaur.expression[["MGH105"]][["cluster"]],y=plaur.expression[["MGH105"]][["expression_level"]])) + 
+#  geom_violin()+
+#  xlab("Cluster ID")+
+#  ylab("Normalized logcounts of PLAUR ")+
+#  scale_y_continuous(breaks=c(0,2,4,6,8,10), limits = c(0, 10))+
+#  labs(title = "MGH105")+
+#  geom_jitter(shape=16, position=position_jitter(0.2), size=3)+theme_bw()+
+#  theme(axis.title.x = element_blank(),
+#       axis.text.x = element_text(size = 30),
+#        axis.title.y = element_blank(),
+#        axis.text.y = element_text(size = 30),
+#        plot.title = element_text(hjust = 0.5,size=30))
+
+for (i in 1:length(plaur.clusters)){
+  ggplot(plaur.expression[[names(plaur.clusters)[i]]], aes(x=plaur.expression[[names(plaur.clusters)[i]]][["cluster"]],y=plaur.expression[[names(plaur.clusters)[i]]][["expression_level"]])) + 
+  geom_violin()+
+  xlab("Cluster ID")+
+  ylab("Normalized logcounts of PLAUR ")+
+  labs(title = names(plaur.clusters)[i])+
+  scale_y_continuous(breaks=c(0,2,4,6,8,10), limits = c(0, 10))+
+  geom_jitter(shape=16, position=position_jitter(0.2), size=3)+theme_bw()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 35),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+ 
+  ggsave(paste("data/output/figures/plaur/plaur_clusters/",names(plaur.clusters)[i], "_plaur_clusters",".pdf"), width = 8,   height = 6)
+}
+
+
+```
+
+```{r}
+#maximum percentages############################################
+maximum_percentages <- data.frame(percentages=c(), author=c())
+for (i in 1:length(plaur.clusters)){
+  x <- data.frame(max_percentage=max(plaur.clusters[[i]]["percentages"]), patient = i, patient_id = names(plaur.clusters[i]))
+  if (names(plaur.clusters[i]) %in% c("BT_S1", "BT_S2", "BT_S4", "BT_S6")){
+    x$authors <- "Darmanis"
+  }
+  else if (names(plaur.clusters[i]) %in% c("MGH26", "MGH28", "MGH29", "MGH30", "MGH31")){
+    x$authors <- "Patel"
+  }
+  else{
+    x$authors <- "Neftel"
+  }
+  maximum_percentages <- rbind(maximum_percentages, x)
+  
+}
+```
+
+```{r}
+#statistical test for maximum percentage clusters distributions####################################################
+test2 <- maximum_percentages[which(maximum_percentages$authors =="Patel"), "max_percentage"]
+test1 <- maximum_percentages[which(maximum_percentages$authors=="Neftel"), "max_percentage"]
+
+wilcox.test(test1,test2)
+
+```
+
+```{r}
+#Make the barplot of the maximum percentages clusters############################################
+maximum_percentages <- arrange(maximum_percentages, max_percentage)
+ggplot(maximum_percentages, aes(x=reorder(patient_id, -max_percentage), y=max_percentage, fill=authors)) + 
+  xlab("Patient ID")+
+  ylab("Maximum percentage of PLAUR \n expressing cells among all clusters")+
+  geom_bar(stat="identity", alpha=0.5,  colour="black")+ 
+  scale_fill_manual(values=c("#7fc97f", "#beaed4", "#fdc086"))+ 
+  scale_y_continuous(breaks=c(0,20,40, 60, 80, 100)) +  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1, size = 8))+
+  theme(axis.title.x = element_text(size = 15),
+        axis.text.x = element_text(size = 10, face = "bold"),
+        axis.title.y = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        legend.text=element_text(size=15),
+        legend.title = element_text(size=15),
+        legend.position = "top",
+        aspect.ratio = 0.618)+
+  ggsave("data/output/figures/plaur/max_plaur_clusters.pdf", width = 8,   height = 6)
+
+```
+
+
+
+
+
+```{r}
+#convert r object to python object##################################################
+library("reticulate")
+library("ggplot2")
+library("SingleCellExperiment")
+library("scater")
+
+dataList_names <- list()
+exprs_list <- list()
+col_data_list <- list()
+row_data_list <- list()
+
+for (i in 1:(length(dataList))){
+  exprs <- assay(dataList[[i]], "logcounts")
+  col_data <- as.data.frame(colData(dataList[[i]]))
+  row_data <- as.data.frame(row.names(dataList[[i]]))
+  exprs_list <- list.append(exprs_list, exprs)
+  col_data_list <- list.append(col_data_list, col_data)
+  row_data_list <- list.append(row_data_list, row_data)
+  dataList_names <- list.append(dataList_names, names(dataList)[i])
+}
+```
+
+
+```{python}
+#find marker genes with scanpy########################################################
+
+import scanpy as sc
+import warnings
+
+
+patients_dict = {}
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    for i in range(len(r.dataList_names)):
+        name = r.dataList_names[i]
+        adata_sce = sc.AnnData(X = r.exprs_list[i].T, obs = r.col_data_list[i], var = r.row_data_list[i])
+        
+        adata_sce.obs['label'] = adata_sce.obs['label'].astype('int').astype('str').astype('category')
+        adata_sce.var.index = list(adata_sce.var[adata_sce.var.columns[0]])
+        
+        sc.tl.rank_genes_groups(adata_sce, groupby = 'label', method = 't-test_overestim_var')
+        patients_dict[name] = {}
+        for n , cluster in enumerate(adata_sce.obs['label'].cat.categories):
+           assert str(n + 1) == cluster
+           diffexpr = sc.get.rank_genes_groups_df(adata_sce, cluster)
+           diffexpr.index = [i+1 for i in diffexpr.index]
+           patients_dict[name][int(cluster)] = diffexpr
+        #print(i, name, len(patients_dict))
+    
+```
+
+
+
+```{r}
+#convert python list to r list#######################################################
+patients_list <- py$patients_dict
+
+markers.patients <- list()
+for (i in 1:(length(patients_list))){
+  library(rlist)
+  markers.clusters <- list()
+  for (j in 1: length(patients_list[[i]])){
+    x <- py_to_r(patients_list[[i]][[j]])
+    markers.clusters <- list.append(markers.clusters,x)
+    names(markers.clusters)[j]<-  j
+  }
+  markers.patients <- list.append(markers.patients, markers.clusters)
+  names(markers.patients)[i]<-  names(patients_list[i])
+  
+}
+rm(markers.clusters, x, col_data_list, dataList_names, exprs_list, row_data_list, patients_list, col_data)
+
+#get the clusters expressing maximum PLAUR############################################
+markers.max.plaur <- list()
+for (i in 1:(length(markers.patients))){
+  library(rlist)
+  x <- markers.patients[[i]][plaur.clusters[[i]][which.max(plaur.clusters[[i]]$percentages), "clusters"]]
+
+  markers.max.plaur <- list.append(markers.max.plaur, x)
+  names(markers.max.plaur)[i]<-  names(plaur.clusters[i])
+  
+}
+rm(x)
+
+```
+
+
+```{r}
+library(EnhancedVolcano)
+test <- markers.max.plaur[["BT1160"]][[1]]
+EnhancedVolcano(test,
+    lab = test$names,
+    selectLab = c('PLAUR'),
+    x = 'logfoldchanges',
+    y = 'pvals_adj',
+    xlab = bquote(~Log[2]~ 'fold change'),
+    col=c("black", '#1f78b4', '#33a02c', 'orange1'),
+    pCutoff = 0.05,
+    FCcutoff = 2.0,
+    pointSize = 1,#c(ifelse(test$names=="PLAUR", 8, 1)),
+    labSize = 6.0,
+    colAlpha = 1,
+    legendPosition = 'right',
+    legendLabSize = 12,
+    legendIconSize = 4.0,
+    drawConnectors = TRUE,
+    widthConnectors = 0.75,
+    legendVisible = FALSE)
+  
+
+for (i in 1:length(markers.max.plaur)){
+  a <- markers.max.plaur[[names(markers.max.plaur)[i]]][[1]]
+  EnhancedVolcano(a,
+    lab = NA,
+    x = 'logfoldchanges',
+    y = 'pvals_adj',
+    col=c("black", '#1f78b4', '#33a02c', 'orange1'),
+    pCutoff = 0.05,
+    FCcutoff = 2.0,
+    pointSize = 3,
+    colAlpha = 1,
+    legendVisible = FALSE)+
+    ggplot2::theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        plot.title = element_blank(),
+        legend.text = element_blank(),
+        title = element_blank(),
+        plot.subtitle = element_blank(),
+        plot.caption = element_blank() )
+    ggplot2::ggsave(paste("data/output/figures/plaur/volcano/",names(markers.max.plaur)[i], "_max_volcano",".png"), width = 8,   height = 6)
+}
+  
+  
+```
+
+
+```{r}
+#Marginal plot with p-value and logFC
+library(ggExtra)
+library(ggpubr)
+plaur.clusters.marker<- data.frame(patient = c(),
+                                   cluster = c(),
+                                   pvals_adj = c(),
+                                   logFC = c())
+for (i in 1:(length(markers.patients))){
+  df <- data.frame(patient = c(),
+                   cluster = c(),
+                   pvals_adj = c(),
+                   logFC = c())
+  for (j in 1: (length(markers.patients[[i]]))){
+    df0 <- data.frame(patient = names(markers.patients[i]), 
+                      cluster = names(markers.patients[[i]][j]),
+                      pvals_adj = markers.patients[[i]][[j]][which(markers.patients[[i]][[j]]$names=="PLAUR"), "pvals_adj"],
+                      logFC = markers.patients[[i]][[j]][which(markers.patients[[i]][[j]]$names=="PLAUR"), "logfoldchanges"])
+    df <- rbind(df, df0)
+  }
+  
+  plaur.clusters.marker <- rbind(plaur.clusters.marker, df)
+  
+}
+
+rm(df, df0)
+
+plaur.clusters.marker$author <- as.factor(c(rep("Darmanis", 11), rep("Patel", 14), rep("Neftel", 117) ))
+
+plaur.max.marker<- data.frame(patient = c(),
+                                   pvals_adj = c(),
+                                   logFC = c())
+for (i in 1:(length(markers.max.plaur))){
+  df <- data.frame(patient = c(),
+                   pvals_adj = c(),
+                   logFC = c())
+  for (j in 1: (length(markers.max.plaur[[i]]))){
+    df0 <- data.frame(patient = names(markers.max.plaur[i]),
+                      pvals_adj = markers.max.plaur[[i]][[j]][which(markers.max.plaur[[i]][[j]]$names=="PLAUR"), "pvals_adj"],
+                      logFC = markers.max.plaur[[i]][[j]][which(markers.max.plaur[[i]][[j]]$names=="PLAUR"), "logfoldchanges"])
+    df <- rbind(df, df0)
+  }
+  
+  plaur.max.marker <- rbind(plaur.max.marker, df)
+  
+}
+rm(df, df0)
+plaur.max.marker$author <- as.factor(c(rep("Darmanis", 4), rep("Patel", 5), rep("Neftel", 28)))
+
+
+p <- ggplot(plaur.max.marker, aes(x=logFC, y=pvals_adj, color=author))+ 
+  scale_color_manual(values=c("#7fc97f", "#beaed4", "#fdc086"))+
+  geom_point(alpha=1, size = 5)+
+  geom_vline(xintercept=2, color="red", linetype="dashed", size=1)+
+  geom_hline(yintercept=0.05, color="red", linetype="dashed", size=1)+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618) 
+ggMarginal(p, type = "histogram", bins = 50)+
+  p+ggsave(paste("data/output/figures/plaur/marginal.pdf"), width = 8,  height = 6)
+
+rm(p)
+
+```
+
+
+
+```{r}
+#Enrichment analysis lists###########################################################
+
+#1. list of high PLAUR cluster marker genes 
+markers.sorted <- list()
+for (i in 1:length(markers.max.plaur)){
+  df0 <- markers.max.plaur[[i]][[1]][markers.max.plaur[[i]][[1]]$pvals_adj<0.01,]
+  df <- df0[df0$logfoldchanges>2,]
+  markers.sorted <- list.append(markers.sorted, df)
+  names(markers.sorted)[i]<-  names(markers.max.plaur[i])
+}
+
+
+markers.all <- list()
+for (i in 1:(length(markers.patients))){
+  markers.all[[i]] <- list()
+  for (j in 1:length(markers.patients[[i]])){
+    df0 <- markers.patients[[i]][[j]][markers.patients[[i]][[j]]$pvals_adj<0.05,]
+    df <- df0[df0$logfoldchanges>2,]
+    markers.all[[i]] <- list.append(markers.all[[i]], df)
+    names(markers.all[[i]])[[j]]<-  j
+    write.table(markers.all[[i]][[j]], file= paste("data/output/figures/plaur/all_cluster_markers/",names(markers.patients)[i], j, ".csv", sep=""))
+  }
+  #markers.all <- list.append(markers.all, markers.all[[i]])
+  names(markers.all)[i]<-  names(markers.patients)[i]
+  
+}
+rm(markers.all)
+
+#2. select patients that has significant PLAUR clusters
+markers.selected <- markers.sorted[c("MGH102", "MGH122", "MGH124", "MGH113", "MGH105", "BT920", "MGH125", "BT_S2", "BT1160", "BT771")]
+                                              
+#3. find common genes from each selected patients lists
+
+#common for inflammatory-subtype
+common.genes<- Reduce(intersect, list(markers.selected[["MGH102"]]$names, markers.selected[["MGH122"]]$names,markers.selected[["MGH124"]]$names, markers.selected[["MGH113"]]$names, markers.selected[["MGH105"]]$names, markers.selected[["MGH125"]]$names, markers.selected[["BT920"]]$names))
+
+#common for ECM-interaction-subtype
+common.genes2 <-  Reduce(intersect, list(markers.selected[["BT_S2"]]$names, markers.selected[["BT771"]]$names))
+
+#marker for BT1160
+marker.genes.BT1160 <- markers.selected[["BT1160"]]
+
+#combined list for inflammatory-subtype
+all.genes.immune <- unique(c(markers.selected[["MGH102"]]$names, markers.selected[["MGH122"]]$names,markers.selected[["MGH124"]]$names, markers.selected[["MGH113"]]$names, markers.selected[["MGH105"]]$names, markers.selected[["MGH125"]]$names, markers.selected[["BT920"]]$names))
+
+#combined list for ECM-interaction-subtype
+all.genes.adhesion <- unique(c(markers.selected[["BT_S2"]]$names, markers.selected[["BT771"]]$names))
+
+```
+
+
+```{r}
+#cluster markers 
+write.table(common.genes, file="data/output/figures/plaur/common_genes")
+write.table(common.genes2, file="data/output/figures/plaur/common_genes2")
+
+write.table(marker.genes.BT920, file="data/output/figures/plaur/marker.genes.BT920")
+write.table(marker.genes.BT771, file="data/output/figures/plaur/marker.genes.BT771")
+write.table(marker.genes.BT_S2, file="data/output/figures/plaur/marker.genes.BT_S2")
+write.table(marker.genes.BT1160, file="data/output/figures/plaur/marker.genes.BT1160")
+
+write.table(all.genes.immune, file="data/output/figures/plaur/all.genes.immune.csv")
+write.table(all.genes.adhesion, file="data/output/figures/plaur/all.genes.adhesion.csv")
+
+```
+
+
+```{r}
+#make cluster enrichment figure
+
+Immune_BPGO <- read.csv("data/upload/plaur/ImmuneResponse_group_GOBP_top15.csv")
+Immune_KEGG <- read.csv("data/upload/plaur/ImmuneResponse_group_KEGG_top15.csv")
+Cycle_BPGO <- read.csv("data/upload/plaur/CellCycle_group_GOBP_top15.csv")
+Cycle_KEGG <- read.csv("data/upload/plaur/CellCycle_group_KEGG_all.csv")
+Adhesion_BPGO <- read.csv("data/upload/plaur/CellAdhesion_group_GOBP_top15.csv")
+Adhesion_KEGG <- read.csv("data/upload/plaur/CellAdhesion_group_KEGG_all.csv")
+
+Immune_BPGO$term_name <- factor(Immune_BPGO$term_name)
+
+geom_bar(aes(factor(Decade), fill=factor(Motivation)), position='fill')
+
+
+p1 <- ggplot(Immune_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.8, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p2 <- ggplot(Immune_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.5, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p3 <- ggplot(Adhesion_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.8, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p4 <- ggplot(Adhesion_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.5, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p5 <- ggplot(Cycle_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.8, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+p6 <- ggplot(Cycle_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=0.5, fill="dodgerblue4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+p12 <- plot_grid(p1, p2, ncol=1, align="v")
+  p12+ggsave("data/output/figures/plaur/Immune_enrich.pdf", width = 8,   height = 6)  
+  
+p34 <- plot_grid( p3, p4, ncol=1, align="v")
+  p34+ggsave("data/output/figures/plaur/Adhesion_enrich.pdf", width = 8,   height = 6)  
+
+p56 <- plot_grid( p5, p6, ncol=1, align="v")
+  p56+ggsave("data/output/figures/plaur/Cycle_enrich.pdf", width = 8,   height = 6) 
+  
+rm(p1,p2,p3,p4,p5,p6,p12,p34,p56)
+```
+
+
+
+
+```{r}
+#enrichment of protein networks
+Immune_left_GOBP <- read.csv("data/upload/plaur/protein_network/cluster/all.genes.immune_left_enrich.csv")[10:24,]
+Immune_left_KEGG <- read.csv("data/upload/plaur/protein_network/cluster/all.genes.immune_left_enrich.csv")[129:135,]
+Immune_right_GOBP <- read.csv("data/upload/plaur/protein_network/cluster/all.genes.immune_right_enrich.csv")[25:39,]
+Immune_right_KEGG <- read.csv("data/upload/plaur/protein_network/cluster/all.genes.immune_right_enrich.csv")[566:580,]
+
+Adhesion_left_GOBP <- read.csv("data/upload/plaur/protein_network/cluster/all.genes.adhesion_left_enrich.csv")[10:24,]
+Adhesion_left_KEGG <- read.csv("data/upload/plaur/protein_network/cluster/all.genes.adhesion_left_enrich.csv")[212:226,]
+Adhesion_right_GOBP <- read.csv("data/upload/plaur/protein_network/cluster/all.genes.adhesion_right_enrich.csv")[2:16,]
+
+c1 <- ggplot(Immune_left_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+c2 <- ggplot(Immune_left_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+c12 <- plot_grid(c1,c2, ncol=1, align="v")
+  c12+ggsave("data/output/figures/plaur/Immune_left_enrich.pdf", width = 8,   height = 6) 
+rm(c1, c2, Immune_left_KEGG, Immune_left_GOBP)
+
+c3 <- ggplot(Immune_right_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+c4 <- ggplot(Immune_right_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+c34 <- plot_grid(c3,c4, ncol=1, align="v")
+  c34+ggsave("data/output/figures/plaur/Immune_right_enrich.pdf", width = 8,   height = 6) 
+rm(c3, c4, Immune_right_KEGG, Immune_right_GOBP)
+
+c5 <- ggplot(Adhesion_left_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+c6 <- ggplot(Adhesion_left_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+c56 <- plot_grid(c5,c6, ncol=1, align="v")
+  c56+ggsave("data/output/figures/plaur/Adhesion_left_enrich.pdf", width = 8,   height = 6) 
+rm(c5, c6, Adhesion_left_KEGG, Adhesion_left_GOBP)
+
+c7 <- ggplot(Adhesion_right_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+c7+ggsave("data/output/figures/plaur/Adhesion_right_enrich.pdf", width = 8,   height = 6)
+rm(C7, Adhesion_right_GOBP)
+
+rm(c1, c2, c3, c4, c5,c6,c7,c12,c34,c56)
+
+```
+
+
+
+```{r}
+# DE of high and low PLAUR cell groups
+source("code/R/Neftel/edgeR.R")
+
+
+plaur.edgeR.p0.05 <- list()
+for (i in 1: length(dataList)){
+  result1 <- edgeR(dataList[[i]], "PLAUR")
+  result2 <- result1[result1$FDR < 0.05, ]
+  result3 <- result2[result2$logFC > 1, ]
+  plaur.edgeR.p0.05 <- list.append(plaur.edgeR.p0.05, result3)
+  names(plaur.edgeR.p0.05)[i]<- str_sub(names(dataList[i]), 5, -7)
+  write.table(result3, file= paste("data/output/figures/plaur/DE_plaur/",names(dataList[i]), sep=""))
+
+}
+rm(result1, result2, result3, plaur.edgeR.p0.05)
+
+adhesion_angio_bind <- unique(c(rownames(plaur.edgeR.p0.05[["BT_S1"]]), rownames(plaur.edgeR.p0.05[["BT_S2"]]), rownames(plaur.edgeR.p0.05[["BT_S4"]]),rownames(plaur.edgeR.p0.05[["BT771"]]),rownames(plaur.edgeR.p0.05[["MGH121"]]), rownames(plaur.edgeR.p0.05[["BT830"]]), rownames(plaur.edgeR.p0.05[["BT771"]]), rownames(plaur.edgeR.p0.05[["BT_S2"]])))
+write.table(adhesion_angio_bind, file= "data/output/figures/plaur/adhesion_angio_bind.csv")
+rm(adhesion_angio_bind)
+
+immune_bind <- unique(c(rownames(plaur.edgeR.p0.05[["MGH101"]]), rownames(plaur.edgeR.p0.05[["MGH102"]]), rownames(plaur.edgeR.p0.05[["MGH105"]]),rownames(plaur.edgeR.p0.05[["MGH106"]]),rownames(plaur.edgeR.p0.05[["MGH110"]]), rownames(plaur.edgeR.p0.05[["MGH113"]]),rownames(plaur.edgeR.p0.05[["MGH115"]]),rownames(plaur.edgeR.p0.05[["MGH122"]]),rownames(plaur.edgeR.p0.05[["MGH124"]]),rownames(plaur.edgeR.p0.05[["MGH125"]]),rownames(plaur.edgeR.p0.05[["MGH30"]]),rownames(plaur.edgeR.p0.05[["BT_S6"]]),rownames(plaur.edgeR.p0.05[["BT786"]]),rownames(plaur.edgeR.p0.05[["BT920"]])))
+write.table(immune_bind, file= "data/output/figures/plaur/immune_bind.csv")
+rm(immune_bind)
+
+cycle_bind <- unique(c(rownames(plaur.edgeR.p0.05[["MGH100"]]), rownames(plaur.edgeR.p0.05[["BT1160"]])))
+write.table(cycle_bind, file= "data/output/figures/plaur/cycle_bind.csv")
+rm(cycle_bind)
+```
+
+
+```{r}
+logcounts_PLAUR2 <- logcounts(dataList[["sce.BT_S2.total"]]["PLAUR",])
+ggplot(data.frame(t(logcounts_PLAUR2)), aes(x=PLAUR)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_PLAUR2["PLAUR",])-0.75*(max(logcounts_PLAUR2["PLAUR",])-min(logcounts_PLAUR2["PLAUR",])),
+             color="red", linetype="dashed", size=1)+
+  ggsave("/home/yue/hdd/yue/data/output/figures/plaur/DE_histogram.pdf", width = 8,   height = 6)
+```
+
+
+```{r}
+#enrichment plots from DEGs of high PLAUR cells
+BT830_angio_BPGO <- read.csv("data/upload/plaur/BT830_tops.csv")
+BT_S2_Adhesion_BPGO <- read.csv("data/upload/plaur/BT_S2_tops.csv")[1:15,]
+BT_S2_Adhesion_KEGG <- read.csv("data/upload/plaur/BT_S2_tops.csv")[16:22,]
+MGH100_cycle_BPGO <- read.csv("data/upload/plaur/MGH100_tops.csv")[1:15,]
+MGH100_cycle_KEGG <- read.csv("data/upload/plaur/MGH100_tops.csv")[16:17,]
+MGH122_immune_BPGO <- read.csv("data/upload/plaur/MGH122_tops.csv")[1:15,]
+MGH122_immune_KEGG <- read.csv("data/upload/plaur/MGH122_tops.csv")[16:30,]
+
+b1 <- ggplot(BT830_angio_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="mediumpurple4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+b2 <- ggplot(BT_S2_Adhesion_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+ 
+b3 <- ggplot(BT_S2_Adhesion_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+b23 <- plot_grid(b2,b3, ncol=1, align="v")
+  b23+ggsave("data/output/figures/plaur/BT_S2_Adhesion_enrich.pdf", width = 8,   height = 6) 
+
+  
+b4 <- ggplot(MGH100_cycle_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="peachpuff4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+ 
+b5 <- ggplot(MGH100_cycle_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="peachpuff4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+b45 <- plot_grid(b4,b5, ncol=1, align="v")
+  b45+ggsave("data/output/figures/plaur/MGH100_cycle_enrich.pdf", width = 8,   height = 6)  
+  
+
+    
+b6 <- ggplot(MGH122_immune_BPGO, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="tan3")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+ 
+b7 <- ggplot(MGH122_immune_KEGG, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="tan3")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+library(cowplot)
+b67 <- plot_grid(b6,b7, ncol=1, align="v")
+  b67+ggsave("data/output/figures/plaur/MGH122_immune_enrich.pdf", width = 8,   height = 6)   
+  
+rm(b1, b2, b3, b4, b5, b6, b7, b23, b45, b67)
+```
+
+##############################################################################################
+###############################################################################################
+#################################################################################################
+
+
+```{r}
+#PANTHER family frequencies
+DE.plaur.all <- c(rownames(plaur.edgeR.p0.05[[1]]), rownames(plaur.edgeR.p0.05[[2]]), rownames(plaur.edgeR.p0.05[[3]]), rownames(plaur.edgeR.p0.05[[4]]), rownames(plaur.edgeR.p0.05[[5]]), rownames(plaur.edgeR.p0.05[[6]]), rownames(plaur.edgeR.p0.05[[7]]), rownames(plaur.edgeR.p0.05[[8]]), rownames(plaur.edgeR.p0.05[[9]]), rownames(plaur.edgeR.p0.05[[10]]), rownames(plaur.edgeR.p0.05[[11]]), rownames(plaur.edgeR.p0.05[[12]]), rownames(plaur.edgeR.p0.05[[13]]), rownames(plaur.edgeR.p0.05[[14]]), rownames(plaur.edgeR.p0.05[[15]]), rownames(plaur.edgeR.p0.05[[16]]), rownames(plaur.edgeR.p0.05[[17]]), rownames(plaur.edgeR.p0.05[[18]]), rownames(plaur.edgeR.p0.05[[19]]), rownames(plaur.edgeR.p0.05[[20]]), rownames(plaur.edgeR.p0.05[[21]]), rownames(plaur.edgeR.p0.05[[22]]), rownames(plaur.edgeR.p0.05[[23]]), rownames(plaur.edgeR.p0.05[[24]]), rownames(plaur.edgeR.p0.05[[25]]), rownames(plaur.edgeR.p0.05[[26]]), rownames(plaur.edgeR.p0.05[[27]]), rownames(plaur.edgeR.p0.05[[28]]), rownames(plaur.edgeR.p0.05[[29]]), rownames(plaur.edgeR.p0.05[[30]]), rownames(plaur.edgeR.p0.05[[31]]),rownames(plaur.edgeR.p0.05[[32]]), rownames(plaur.edgeR.p0.05[[33]]), rownames(plaur.edgeR.p0.05[[34]]), rownames(plaur.edgeR.p0.05[[35]]), rownames(plaur.edgeR.p0.05[[36]]), rownames(plaur.edgeR.p0.05[[37]]))
+DE.plaur <-as.data.frame(table(DE.plaur.all))
+write.table(DE.plaur, file="data/output/figures/plaur/DE.plaur.all")
+
+DE.panther <- as.data.frame(read.delim(file="data/text/plaur/DE_plaur_panther.csv"))
+
+m1 <- merge(DE.plaur, DE.panther, by.x = "DE.plaur.all", by.y = "gene")
+
+m <- c()
+for (i in 1:nrow(m1)){
+  m <- str_sub(c(m, gsub(".*\\((.*)\\).*", "\\1", m1$panther.family[i])), 1, 9)
+}
+
+m1$panther <- m
+panther.freq <-as.data.frame(table(m1$panther))
+
+test <- as.data.table(m1)
+test1 <- test[, list(totalB = sum(Freq), num = .N), by = panther]
+```
+
+
+
+```{r}
+#filter all the marker genes
+criteria <- markers.max.plaur[["BT1160"]][[1]][,5]<0.05&markers.max.plaur[["BT1160"]][[1]][,3]>2
+test105 <- markers.max.plaur[["MGH105"]][[1]][criteria,]
+test105$rank <- rank(test105$pvals_adj)
+
+test102 <- markers.max.plaur[["MGH102"]][[1]][criteria,]
+test102$rank <- rank(test102$pvals_adj)
+
+test122 <- markers.max.plaur[["MGH122"]][[1]][criteria,]
+test122$rank <- rank(test122$pvals_adj)
+
+test124 <- markers.max.plaur[["MGH124"]][[1]][criteria,]
+test124$rank <- rank(test124$pvals_adj)
+
+test113 <- markers.max.plaur[["MGH113"]][[1]][criteria,]
+test113$rank <- rank(test113$pvals_adj)
+
+testBTS2 <- markers.max.plaur[["BT_S2"]][[1]][criteria,]
+testBTS2$rank <- rank(testBTS2$pvals_adj)
+
+
+test125 <- markers.max.plaur[["MGH125"]][[1]][criteria,]
+test125$rank <- rank(test125$pvals_adj)
+
+testBT920 <- markers.max.plaur[["BT920"]][[1]][criteria,]
+testBT920$rank <- rank(testBT920$pvals_adj)
+
+testBT771 <- markers.max.plaur[["BT771"]][[1]][criteria,]
+testBT771$rank <- rank(testBT771$pvals_adj)
+
+testBT1160 <- markers.max.plaur[["BT1160"]][[1]][criteria,]
+testBT1160$rank <- rank(testBT1160$pvals_adj)
+```
+
+
+
+
+######################################################################################################
+
+
+
+
+```{r}
+#Distribution test#################################################################
+test<- tpm(sce.MGH101.total[,7])
+test<- logcounts(sce.BT_S2.total[,7])
+test1 <- frankv(test, ties.method = "dense")
+logcounts_PLAUR2_test <- test["PLAUR",]
+ggplot(data.frame(test1), aes(x=test1)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=logcounts_PLAUR2_test,
+             color="red", linetype="dashed", size=1)
+
+logcounts_PLAUR2 <- logcounts(sce.MGH102.total["PLAUR",])
+ggplot(data.frame(t(logcounts_PLAUR2)), aes(x=PLAUR)) +
+  geom_histogram(bins = 100)+
+  #scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_PLAUR2["PLAUR",])-0.75*(max(logcounts_PLAUR2["PLAUR",])-min(logcounts_PLAUR2["PLAUR",])),
+             color="red", linetype="dashed", size=1)
+
+logcounts_PLAUR2 <- logcounts(sce.MGH124.total["PLAUR",])
+high.plaur <- logcounts(sce.MGH124.total)[, which(logcounts(sce.MGH124.total["PLAUR",])>(max(logcounts_PLAUR2["PLAUR",])-0.75*(max(logcounts_PLAUR2["PLAUR",])-min(logcounts_PLAUR2["PLAUR",]))))]
+
+ggplot(data.frame(t(high.plaur)), aes(x=ITGAX)) +
+  geom_histogram(bins = 100)
+###################################################################################
+
+sce.high.plaur <- sce.MGH124.total[, which(logcounts(sce.MGH124.total["PLAUR",])>(max(logcounts_PLAUR2["PLAUR",])-0.75*(max(logcounts_PLAUR2["PLAUR",])-min(logcounts_PLAUR2["PLAUR",]))))]
+genes.MGH124 <- row.names(counts(sce.high.plaur))
+sce.high.plaur <- dimension.reduction(genes.MGH124, sce.high.plaur)
+
+plotReducedDim(sce.high.plaur, dimred="UMAP", colour_by ="PLAUR")
+
+```
+
+```{r}
+logcounts_immu <- logcounts(sce.MGH102.total["C1QA",])
+ggplot(data.frame(t(logcounts_immu)), aes(x=C1QA)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_immu["C1QA",])-0.75*(max(logcounts_immu["C1QA",])-min(logcounts_immu["C1QA",])),
+             color="red", linetype="dashed", size=1)
+```
+
+
+
+
+
+```{r}
+#INTERESTED GENES##############################################################################
+# source("code/R/Darmanis/interested_genes.R")
+# genes <- row.names(counts(sce.total))
+genes.BT_S2 <- row.names(counts(sce.BT_S2.total))
+genes.BT_S1 <- row.names(counts(sce.BT_S1.total))
+genes.BT_S4 <- row.names(counts(sce.BT_S4.total))
+genes.BT_S6 <- row.names(counts(sce.BT_S6.total))
+genes.BT1187 <- row.names(counts(sce.BT1187.total))
+genes.MGH122 <- row.names(counts(sce.MGH122.total))
+genes.MGH105 <- row.names(counts(sce.MGH105.total))
+genes.BT830 <- row.names(counts(sce.BT830.total))
+genes.MGH106 <- row.names(counts(sce.MGH106.total))
+genes.MGH110 <- row.names(counts(sce.MGH110.total))
+
+```
+
+```{r}
+#DIMENSION REDUCTION ON EACH PATIENT CELLS######################################################
+source("code/R/Darmanis/dimension_reduction.R")
+
+sce.BT_S2.total <- dimension.reduction(genes.BT_S2, sce.BT_S2.total)
+sce.BT_S1.total <- dimension.reduction(genes.BT_S1, sce.BT_S1.total)
+sce.BT_S4.total <- dimension.reduction(genes.BT_S4, sce.BT_S4.total)
+sce.BT_S6.total <- dimension.reduction(genes.BT_S6, sce.BT_S6.total)
+sce.BT1187.total <- dimension.reduction(genes.BT1187, sce.BT1187.total)
+sce.MGH122.total <- dimension.reduction(genes.MGH122, sce.MGH122.total)
+sce.MGH105.total <- dimension.reduction(genes.MGH105, sce.MGH105.total)
+sce.BT830.total <- dimension.reduction(genes.BT830, sce.BT830.total)
+sce.MGH110.total <- dimension.reduction(genes.MGH110, sce.MGH110.total)
+
+
+plotReducedDim(sce.MGH110.total, dimred="TSNE", colour_by ="PLAUR", point_size=5)+
+  ggsave(paste("data/output/figures/plaur/mgh122_tsne.pdf"), width = 8,  height = 6)
+
+for (i in 1: length(dataList)){
+  dataList[[i]] <- dimension.reduction(row.names(counts(dataList[[i]])), dataList[[i]])
+
+  #write.table(result3, file= paste("data/output/figures/plaur/DE_plaur/",names(dataList[i]), sep=""))
+  plotReducedDim(dataList[[i]], dimred="TSNE", colour_by ="PLAUR", point_size=5)+
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 30),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 30),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 30),
+        legend.key.size = unit(0.8, "cm"))+ 
+  ggsave(paste("data/output/figures/plaur/tsne/", names(dataList[i]), ".pdf",sep = ""), width = 8,  height = 6)
+}
+
+```
+
+
+
+
+
+
+```{r}
+PLAUR <-  c(logcounts(sce.BT_S1.total["PLAUR",])) 
+
+TP53 <- c(logcounts(sce.BT_S2.total["TP53",]))
+CRY1 <- c(logcounts(sce.BT_S2.total["CRY1",]))
+CRY2 <-  c(logcounts(sce.BT_S2.total["CRY2",])) 
+POLR2A <- c(logcounts(sce.BT_S2.total["POLR2A",]))
+HDAC1 <-  c(logcounts(sce.BT_S2.total["HDAC1",])) 
+SOX2 <-  c(logcounts(sce.BT_S2.total["SOX2",])) 
+CTNNB1 <-  c(logcounts(sce.BT_S2.total["CTNNB1",])) 
+
+
+test <- data.frame(SOX2, PLAUR)
+ggplot(test, aes(x=SOX2, y=PLAUR)) + 
+  geom_point()
+
+logcounts_PLAUR2 <- logcounts(dataList[["sce.BT_S2.total"]]["PLAUR",])
+ggplot(data.frame(t(logcounts_PLAUR2)), aes(x=PLAUR)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_PLAUR2["PLAUR",])-0.75*(max(logcounts_PLAUR2["PLAUR",])-min(logcounts_PLAUR2["PLAUR",])),
+             color="red", linetype="dashed", size=1)
+
+factor_test2 <- factor(logcounts(sce.BT_S2.total["PLAUR",]) > max(logcounts_PLAUR2["PLAUR",])-0.75*(max(logcounts_PLAUR2["PLAUR",])-min(logcounts_PLAUR2["PLAUR",])))
+
+logcounts_PLAUR1 <- logcounts(sce.BT_S1.total["PLAUR",])
+ggplot(data.frame(t(logcounts_PLAUR1)), aes(x=PLAUR)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=max(logcounts_PLAUR1["PLAUR",])-0.75*(max(logcounts_PLAUR1["PLAUR",])-min(logcounts_PLAUR1["PLAUR",])),
+             color="red", linetype="dashed", size=1)
+
+
+library(MAST)
+fData <- data.frame(names = rownames(logcounts(sce.BT_S2.total)))
+rownames(fData) <- rownames(logcounts(sce.BT_S2.total))
+cData <- data.frame(cond = factor_test2)
+rownames(cData) <- colnames(logcounts(sce.BT_S2.total))
+
+obj <- FromMatrix(as.matrix(logcounts(sce.BT_S2.total)), cData, fData)
+#colData(obj)$cngeneson <- scale(colSums(assay(obj) > 0))
+cond <- factor(colData(obj)$cond)
+
+# Model expression as function of condition & number of detected genes
+zlmCond <- zlm(~ cond, obj) 
+summaryCond <- summary(zlmCond)
+summaryDt <- summaryCond$datatable
+
+
+source("/home/hdd/yue/code/R/Neftel/edgeR.R")
+result6_PLAUR_edgeR <- edgeR(sce.BT_S6.total, "PLAUR")
+write.table(result6_PLAUR_edgeR, file="/home/hdd/yue/data/output/result6_PLAUR_edgeR")
+
+```
+
+
+
+```{r}
+#CENTERING THE CELLS##############################################################################
+all.genes <- row.names(sce.BT_S2.total)
+BT_S2.seurat <- as.Seurat(sce.BT_S2.total, counts = "counts", data = "logcounts")
+BT_S2.seurat <- ScaleData(BT_S2.seurat, features = all.genes)
+test2 <- BT_S2.seurat@assays[["RNA"]]@scale.data
+
+ggplot(data.frame(PLAUR = test2["PLAUR",]), aes(x=PLAUR)) +
+  geom_histogram(bins = 100)+
+  scale_y_log10()+
+  geom_vline(xintercept=0.25*max(test2["PLAUR",]),
+             color="red", linetype="dashed", size=1)
+
+selected_2 <- test2[,test2["PLAUR",] > 0.25*max(test2["PLAUR",])]
+omited_2 <- test2[, test2["PLAUR",] <= 0.25*max(test2["PLAUR",])]
+#####################################################################################################
+```
+

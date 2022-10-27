@@ -1,0 +1,544 @@
+---
+title: "ID_patients"
+author: "Yue He"
+date: "11/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '~/hdd/yue')
+library(reticulate)
+use_python("/home/yue/miniconda3/bin/python3", required = TRUE)
+```
+
+
+```{python}
+# This is just a test to see if python is working properly
+import sys
+print(sys.executable)
+import scanpy as sc
+```
+
+
+```{r}
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(msigdbr)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(uwot)
+library(Rtsne)
+library(PCAtools)
+library("RColorBrewer")
+library(d3heatmap)
+library(stringr)
+```
+
+```{r}
+#arrange columns
+set.seed(8)
+#countMatrix_aggregate <- read.csv("data/CM/ID132/countMatrix_ID132", header = TRUE)
+#countMatrix_aggregate <- read.csv("data/CM/ID136/countMatrix_ID136", header = TRUE)
+#countMatrix_aggregate <- read.table("data/CM/ID140/countMatrix_ID140", header = TRUE)
+#countMatrix_aggregate <- read.table("data/CM/ID143/countMatrix_ID143", header = TRUE)
+#countMatrix_aggregate <- read.table("data/CM/ID155/countMatrix_ID155", header = TRUE)
+countMatrix_aggregate <- read.table("/home/yue/hdd/yue/data/CM/ID156/countMatrix_ID156", header = TRUE)
+
+colnames(countMatrix_aggregate) <- gsub("\\.", "", colnames(countMatrix_aggregate))
+countMatrix_aggregate <- countMatrix_aggregate[,str_sort(colnames(countMatrix_aggregate),numeric = TRUE)]
+write.table(countMatrix_aggregate, file="/home/yue/hdd/yue/data/CM/ID156/CM_ID156")
+```
+
+```{r}
+#load_data
+set.seed(8)
+assign_names <- function(dir1, dir2) {
+  geneNames <- read.csv(dir1, header = TRUE) 
+  rawMatrix <- read.table(dir2, header = TRUE)
+  raw1Matrix <- left_join(geneNames, rawMatrix,  by = c("ensembl_gene_id"="gene_id")) 
+  cMatrix <- na.omit(raw1Matrix)
+  countMatrix <- cMatrix[, -1]
+  
+  
+  #aggregate rows that have the same gene names
+  #countMatrix <- aggregate(x = countMatrix[-1], by = list(countMatrix$gene), FUN = sum)
+  return(countMatrix)
+}
+#countMatrix_GT <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", "/home/yue/hdd/yue/data/CM/ID132/CM_ID132")
+#countMatrix_GT <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", "/home/yue/hdd/yue/data/CM/ID136/CM_ID136")
+#countMatrix_GT <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", "/home/yue/hdd/yue/data/CM/ID140/CM_ID140")
+#countMatrix_GT <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", "/home/yue/hdd/yue/data/CM/ID143/CM_ID143")
+#countMatrix_GT <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", "/home/yue/hdd/yue/data/CM/ID155/CM_ID155")
+countMatrix_GT <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", "/home/yue/hdd/yue/data/CM/ID156/CM_ID156")
+
+
+#write.table(countMatrix_GT, file="/home/yue/hdd/yue/data/CM/ID132/ID132_CM")
+#write.table(countMatrix_GT, file="/home/yue/hdd/yue/data/CM/ID136/ID136_CM")
+#write.table(countMatrix_GT, file="/home/yue/hdd/yue/data/CM/ID140/ID140_CM")
+#write.table(countMatrix_GT, file="/home/yue/hdd/yue/data/CM/ID143/ID143_CM")
+#write.table(countMatrix_GT, file="/home/yue/hdd/yue/data/CM/ID155/ID155_CM")
+write.table(countMatrix_GT, file="/home/yue/hdd/yue/data/CM/ID156/ID156_CM")
+
+```
+
+
+
+```{r}
+#load data############################################################################
+set.seed(8)
+source("/home/yue/hdd/yue/code/R/ID132/load_data.R")
+sce_ID132 <-load.data.GT("/home/yue/hdd/yue/data/CM/ID132/ID132_CM", "/home/yue/hdd/yue/data/text/ID132/ID132_meta.csv" )
+sce_ID136 <-load.data.GT("/home/yue/hdd/yue/data/CM/ID136/ID136_CM", "/home/yue/hdd/yue/data/text/ID136/ID136_meta.csv" )
+sce_ID140 <-load.data.GT("/home/yue/hdd/yue/data/CM/ID140/ID140_CM", "/home/yue/hdd/yue/data/text/ID140/ID140_meta.csv" )
+sce_ID143 <-load.data.GT("/home/yue/hdd/yue/data/CM/ID143/ID143_CM", "/home/yue/hdd/yue/data/text/ID143/ID143_meta.csv" )
+sce_ID155 <-load.data.GT("/home/yue/hdd/yue/data/CM/ID155/ID155_CM", "/home/yue/hdd/yue/data/text/ID155/ID155_meta.csv" )
+sce_ID156 <-load.data.GT("/home/yue/hdd/yue/data/CM/ID156/ID156_CM", "/home/yue/hdd/yue/data/text/ID156/ID156_meta.csv" )
+
+```
+
+
+```{r}
+#QC#######################################################################################################################
+set.seed(8)
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(SingleCellExperiment)
+isSpike(sce_ID156, "ERCC") <- grepl("^ERCC-", rownames(sce_ID156))
+isSpike(sce_ID156, "MT") <- rownames(sce_ID156) %in% c("MT-TF",   "MT-RNR1", "MT-TV", "MT-RNR2", "MT-TL1",  "MT-ND1", 
+                                           "MT-TI",   "MT-TQ",   "MT-TM",  "MT-ND2",  "MT-TW",  "MT-TA",   
+                                           "MT-TN",   "MT-TC",  "MT-TY" ,  "MT-CO1",  "MT-TS1",  "MT-TD",
+                                           "MT-CO2",  "MT-TK",   "MT-ATP8", "MT-ATP6", "MT-CO3",  "MT-TG",   
+                                           "MT-ND3",  "MT-TR",   "MT-ND4L", "MT-ND4",  "MT-TH",   "MT-TS2",
+                                           "MT-TL2",  "MT-ND5",  "MT-ND6", "MT-TE",   "MT-CYB",  "MT-TT", "MT-TP")
+
+sce_ID156 <- calculateQCMetrics(
+  sce_ID156,
+  feature_controls = list(
+    ERCC = isSpike(sce_ID156, "ERCC"), 
+    MT = isSpike(sce_ID156, "MT")
+  )
+)
+
+
+sce_ID156_pre_processing <- data.frame(sce_ID156.total_counts= sce_ID156$total_counts, sce_ID156.total_features_by_counts = sce_ID156$total_features_by_counts, MT_percentage=sce_ID156$pct_counts_MT)
+
+
+#hist(
+#  sce_ID132$total_counts,
+#  breaks = 100
+#)
+#abline(v = 25000, col = "red")
+
+
+ggplot(data.frame(sce_ID156$total_counts), aes(x=sce_ID156.total_counts))+
+  geom_histogram(fill="#ccebc5", color="black", bins=40)+
+  #geom_vline(aes(xintercept=50000), color="red", size=1)+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+ 
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pre_processing_figures/ID156_total_counts.pdf", width = 8,  height = 6)
+
+
+#hist(
+#  sce_ID132$total_features_by_counts, 
+#  xlab = "Number of detected genes", labels = FALSE,
+#  main = "ID132",
+#  breaks = 100
+#)
+#abline(v = 4000, col = "red")
+
+
+ggplot(data.frame(sce_ID156$total_features_by_counts), aes(x=sce_ID156.total_features_by_counts))+
+  geom_histogram(fill="#ccebc5", color="black", bins=40)+
+  #geom_vline(aes(xintercept=3000), color="red", size=1)+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+ 
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pre_processing_figures/ID156_total_features_by_counts.pdf", width = 8,  height = 6)
+
+
+
+#plotColData(
+# sce_ID132,
+#  x = "total_features_by_counts",
+#  y = "pct_counts_MT"
+#)
+
+
+ggplot(sce_ID156_pre_processing, aes(x=sce_ID156.total_features_by_counts, y=MT_percentage)) +
+  geom_point(size=2, shape=23)+
+  #geom_hline(aes(yintercept=10), color="red", size=1)+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+ 
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pre_processing_figures/ID156_MT_percentages.pdf", width = 8,  height = 6)
+
+
+```
+
+
+```{r}
+set.seed(8)
+#source("/home/yue/hdd/yue/code/R/ID132/pre_processing_tpm.R")
+source("/home/yue/hdd/yue/code/R/ID132/pre_processing_pseudo_lib.R")
+
+sce.ID132 <- pre.processing.pseudo.lib(sce_ID132)
+sce.ID136 <- pre.processing.pseudo.lib(sce_ID136)
+sce.ID140 <- pre.processing.pseudo.lib(sce_ID140)
+sce.ID143 <- pre.processing.pseudo.lib(sce_ID143)
+sce.ID155 <- pre.processing.pseudo.lib(sce_ID155)
+sce.ID156 <- pre.processing.pseudo.lib(sce_ID156)
+
+#sce.ID132 <- pre.processing.tpm(sce_ID132)
+#sce.ID136 <- pre.processing.tpm(sce_ID136)
+#sce.ID140 <- pre.processing.tpm(sce_ID140)
+#sce.ID143 <- pre.processing.tpm(sce_ID143)
+#sce.ID155 <- pre.processing.tpm(sce_ID155)
+rm(sce_ID132,sce_ID136,sce_ID140,sce_ID143, sce_ID155, sce_ID156)
+
+#write.table(sce.ID132, file="/home/yue/hdd/yue/data/CM/pre_processed/sce.ID132")
+#write.table(sce.ID136, file="/home/yue/hdd/yue/data/CM/pre_processed/sce.ID136")
+#write.table(sce.ID140, file="/home/yue/hdd/yue/data/CM/pre_processed/sce.ID140")
+#write.table(sce.ID143, file="/home/yue/hdd/yue/data/CM/pre_processed/sce.ID143")
+#write.table(sce.ID155, file="/home/yue/hdd/yue/data/CM/pre_processed/sce.ID155")
+
+```
+
+
+```{r}
+set.seed(8)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting.R")
+#source("/home/yue/hdd/yue/code/R/ID_patients/clusting_change.R")
+
+sce.ID132@colData@listData[["label"]] <- clusting(sce.ID132)
+sce.ID136@colData@listData[["label"]] <- clusting(sce.ID136)
+sce.ID140@colData@listData[["label"]] <- clusting(sce.ID140)
+sce.ID143@colData@listData[["label"]] <- clusting(sce.ID143)
+sce.ID155@colData@listData[["label"]] <- clusting(sce.ID155)
+sce.ID156@colData@listData[["label"]] <- clusting(sce.ID156)
+
+
+#source("/home/yue/hdd/yue/code/R/Darmanis/dimension_reduction.R")
+#sce.ID143 <- dimension.reduction(row.names(counts(sce.ID143)), sce.ID143)
+#plotReducedDim(sce.ID143, dimred="UMAP", colour_by ="label", point_size=5)
+
+
+```
+
+
+```{r}
+#Get dataList for all the SingleCellExperiment (Here you need to run the main_PROM1_cluster.r script to the dataList part)
+set.seed(8)
+dataList0 <- mget(ls(pattern = 'sce.*'))
+
+dataList <- dataList0[c("sce.ID132", "sce.ID136","sce.ID140","sce.ID143","sce.ID155","sce.ID156")]
+rm()
+
+```
+
+
+```{r}
+#convert r object to python object##################################################
+set.seed(8)
+library("reticulate")
+library("ggplot2")
+library("SingleCellExperiment")
+library("scater")
+
+set.seed(6)
+dataList_names <- list()
+exprs_list <- list()
+col_data_list <- list()
+row_data_list <- list()
+
+for (i in 1:(length(dataList))){
+  exprs <- assay(dataList[[i]], "logcounts")
+  col_data <- as.data.frame(colData(dataList[[i]]))
+  row_data <- as.data.frame(row.names(dataList[[i]]))
+  exprs_list <- list.append(exprs_list, exprs)
+  col_data_list <- list.append(col_data_list, col_data)
+  row_data_list <- list.append(row_data_list, row_data)
+  dataList_names <- list.append(dataList_names, names(dataList)[i])
+}
+```
+
+
+```{python}
+#find marker genes with scanpy########################################################
+
+
+import scanpy as sc
+import warnings
+
+
+patients_dict = {}
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    for i in range(len(r.dataList_names)):
+        name = r.dataList_names[i]
+        adata_sce = sc.AnnData(X = r.exprs_list[i].T, obs = r.col_data_list[i], var = r.row_data_list[i])
+        
+        adata_sce.obs['label'] = adata_sce.obs['label'].astype('int').astype('str').astype('category')
+        adata_sce.var.index = list(adata_sce.var[adata_sce.var.columns[0]])
+        
+        sc.tl.rank_genes_groups(adata_sce, groupby = 'label', method = 't-test_overestim_var')
+        patients_dict[name] = {}
+        for n , cluster in enumerate(adata_sce.obs['label'].cat.categories):
+           assert str(n + 1) == cluster
+           diffexpr = sc.get.rank_genes_groups_df(adata_sce, cluster)
+           diffexpr.index = [i+1 for i in diffexpr.index]
+           patients_dict[name][int(cluster)] = diffexpr
+        #print(i, name, len(patients_dict))
+    
+```
+
+
+
+```{r}
+#convert python list to r list#######################################################
+set.seed(8)
+patients_list <- py$patients_dict
+
+markers.patients <- list()
+for (i in 1:(length(patients_list))){
+  library(rlist)
+  markers.clusters <- list()
+  for (j in 1: length(patients_list[[i]])){
+    x <- py_to_r(patients_list[[i]][[j]])
+    markers.clusters <- list.append(markers.clusters,x)
+    names(markers.clusters)[j]<-  j
+  }
+  markers.patients <- list.append(markers.patients, markers.clusters)
+  names(markers.patients)[i]<-  names(patients_list[i])
+  
+}
+rm(markers.clusters, x, col_data_list, dataList_names, exprs_list, row_data_list, patients_list, col_data)
+
+#export markers for every cluster
+markers.all <- list()
+for (i in 1:(length(markers.patients))){
+  markers.all[[i]] <- list()
+  for (j in 1:length(markers.patients[[i]])){
+    df0 <- markers.patients[[i]][[j]][markers.patients[[i]][[j]]$pvals_adj<0.05,]
+    df <- df0[df0$logfoldchanges>2,]
+    markers.all[[i]] <- list.append(markers.all[[i]], df)
+    names(markers.all[[i]])[[j]]<-  j
+    write.table(markers.all[[i]][[j]], file= paste("/home/yue/hdd/yue/data/output/figures/ID_patients/all_cluster_markers_pseudo_louvain_lib_withID156/",names(markers.patients)[i], j, ".csv", sep=""))
+  }
+  #markers.all <- list.append(markers.all, markers.all[[i]])
+  names(markers.all)[i]<-  names(markers.patients)[i]
+  
+}
+
+#get all the clusters with PROM1 in it. 
+
+#clusters.PROM1 <- list(MGH100_2 = markers.patients[["sce.MGH100.total"]][["2"]], MGH101_2 = markers.patients[["sce.MGH101.total"]][["2"]], MGH102_2=markers.patients[["sce.MGH102.total"]][["2"]], MGH113_1=markers.patients[["sce.MGH113.total"]][["1"]], MGH122_3 = markers.patients[["sce.MGH122.total"]][["3"]], MGH124_1 = markers.patients[["sce.MGH124.total"]][["1"]], MGH125_2 = markers.patients[["sce.MGH125.total"]][["2"]], MGH151_2 = markers.patients[["sce.MGH151.total"]][["2"]])
+
+
+```
+
+```{r}
+set.seed(8)
+#genes_ID132 <- row.names(logcounts(sce.ID132))
+#genes_ID136 <- row.names(logcounts(sce.ID136))
+#genes_ID140 <- row.names(logcounts(sce.ID140))
+#genes_ID143 <- row.names(logcounts(sce.ID143))
+#genes_ID155 <- row.names(logcounts(sce.ID155))
+
+#source("/home/yue/hdd/yue/code/R/ID_patients/clusting_change.R")
+#source("/home/yue/hdd/yue/code/R/Darmanis/clusting.R")
+#sce.ID155@colData@listData[["label"]] <- clusting.change(sce.ID155)
+source("/home/yue/hdd/yue/code/R/Darmanis/dimension_reduction.R")
+sce.ID156 <- dimension.reduction(row.names(counts(sce.ID156)), sce.ID156)
+plotReducedDim(sce.ID156, dimred="UMAP", colour_by ="label", point_size=5)+
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 30),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 30),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 30),
+        legend.key.size = unit(0.8, "cm"))+ 
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/umap/sce.ID156.pdf", width = 8,  height = 6)
+# + ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/test_clustering_change_10_1.pdf")
+
+
+
+source("/home/yue/hdd/yue/code/R/Darmanis/dimension_reduction.R")
+for (i in 1: length(dataList)){
+  dataList[[i]] <- dimension.reduction(row.names(counts(dataList[[i]])), dataList[[i]])
+
+  plotReducedDim(dataList[[i]], dimred="UMAP", colour_by ="label", point_size=5)+
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 30),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 30),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 30),
+        legend.key.size = unit(0.8, "cm"))+ 
+  ggsave(paste("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich_includeID156/umap/", names(dataList[i]), ".pdf",sep = ""), width = 8,  height = 6)
+}
+```
+
+
+```{r}
+set.seed(8)
+ID132_2_stem_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/stem-like/ID132_2.csv")[1:10,]
+ID136_3_stem_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/stem-like/ID136_3.csv")[10:19,]
+ID143_3_stem_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/stem-like/ID143_3.csv")[11:20,]
+ID143_5_stem_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/stem-like/ID143_5.csv")[1:10,]
+ID155_5_stem_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/stem-like/ID155_5.csv")[4:13,]
+ID156_3_stem_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/stem-like/ID156_3.csv")[7:16,]
+ID156_7_stem_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/stem-like/ID156_7.csv")[6:15,]
+
+
+a1 <- ggplot(ID132_2_stem_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID132_2.pdf", width = 8,   height = 6)
+a2 <- ggplot(ID136_3_stem_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID136_3.pdf", width = 8,   height = 6)
+a3 <- ggplot(ID143_3_stem_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID143_3.pdf", width = 8,   height = 6)
+a4 <- ggplot(ID143_5_stem_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID143_5.pdf", width = 8,   height = 6)
+a5 <- ggplot(ID155_5_stem_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID155_5.pdf", width = 8,   height = 6)
+a6 <- ggplot(ID156_3_stem_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID156_3.pdf", width = 8,   height = 6)
+a7 <- ggplot(ID156_7_stem_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID156_7.pdf", width = 8,   height = 6)
+
+#library(cowplot)
+#a12 <- plot_grid(a1,a2, ncol=1,align="v")
+#  a12+ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/stem12.pdf", width = 8,   height = 6)
+#a34 <- plot_grid(a3,a4, ncol=1,align="v")
+#  a34+ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/stem34.pdf", width = 8,   height = 6)
+#a5 <- plot_grid(a5,ncol=1,align="v")
+#  a5+ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/stem5.pdf", width = 8,   height = 6)
+```
+
+```{r}
+set.seed(8)
+ID132_1_cycle_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/cell cycle/ID132_1.csv")[50:59,]
+
+b1 <- ggplot(ID132_1_cycle_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID132_1_cycle.pdf", width = 8,   height = 6)
+
+```
+
+```{r}
+set.seed(8)
+ID140_4_mesenchymal_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/mesenchymal/ID140_4.csv")[19:28,]
+
+ID155_3_mesenchymal_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/mesenchymal/ID155_3.csv")[28:37,]
+ID156_1_mesenchymal_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/mesenchymal/ID156_1.csv")[7:16,]
+ID156_5_mesenchymal_GOBP <- read.csv("/home/yue/hdd/yue/data/upload/pseudo_louvain_enrichment/mesenchymal/ID156_5.csv")[15:24,]
+
+
+
+c1 <- ggplot(ID140_4_mesenchymal_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID140_4_mesenchymal.pdf", width = 8,   height = 6)
+
+c2 <- ggplot(ID155_3_mesenchymal_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID155_3_mesenchymal.pdf", width = 8,   height = 6)
+
+c3 <- ggplot(ID156_1_mesenchymal_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID156_1_mesenchymal.pdf", width = 8,   height = 6)
+
+c4 <- ggplot(ID156_5_mesenchymal_GOBP, aes(x=reorder(term_name, negative_log10_of_adjusted_p_value), y = negative_log10_of_adjusted_p_value))+
+  geom_col(alpha=1, fill="darkolivegreen4")+
+  coord_flip()+theme_minimal_grid()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  ggsave("/home/yue/hdd/yue/data/output/figures/ID_patients/pseudo_louvain_enrich/ID156_5_mesenchymal.pdf", width = 8,   height = 6)
+
+
+```
+
+

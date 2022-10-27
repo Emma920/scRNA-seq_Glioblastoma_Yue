@@ -1,0 +1,309 @@
+---
+title: "main_Darmanis_normal_cancer_umap_illustration"
+author: "Yue He"
+date: "4/29/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '~/hdd/yue')
+library(reticulate)
+use_python("/home/yue/miniconda3/bin/python3", required = TRUE)
+```
+
+
+```{python}
+# This is just a test to see if python is working properly
+import sys
+print(sys.executable)
+import scanpy as sc
+```
+
+
+```{r}
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(msigdbr)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(uwot)
+library(Rtsne)
+library(PCAtools)
+library("RColorBrewer")
+library(d3heatmap)
+library(stringr)
+library(rlist)
+
+```
+
+
+```{r}
+#load_data
+#assign_names <- function(dir1, dir2) {
+#  rawMatrix <- read.table(dir2, header = TRUE)
+#  raw1Matrix <- left_join(geneNames, rawMatrix,  by = c("ensembl_gene_id"="gene_id")) 
+#  cMatrix <- na.omit(raw1Matrix)
+#  countMatrix <- cMatrix[, -1]
+  
+  
+  #aggregate rows that have the same gene names
+  #countMatrix <- aggregate(x = countMatrix[-1], by = list(countMatrix$gene), FUN = sum)
+#  return(countMatrix)
+#}
+#countMatrix_GT_normal <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", #"/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/countMatrix_Darmanis_normal_combined")
+#write.table(countMatrix_GT_normal, file="/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_normal_combined_CM")
+
+#load data############################################################################
+source("/home/yue/hdd/yue/code/R/ID132/load_data.R")
+sce_Darmanis_normal <-load.data.GT("/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_normal_combined_CM", "/home/yue/hdd/yue/data/text/Darmanis_normal/Darmanis_combined_meta.txt" )
+
+source("/home/yue/hdd/yue/code/R/ID132/pre_processing_lib.R")
+sce.normal.total <- pre.processing.lib(sce_Darmanis_normal)
+
+sce.normal.somatic <- subset(sce.normal.total, , cell_type!="Fetal_quiescent"&cell_type!="Fetal_replicating")
+rm(sce_Darmanis_normal)
+#saveRDS(sce.total, file = "/home/yue/hdd/yue/data/output/rds/sce.total.rds")
+#sce.normal.total <- readRDS("/home/yue/hdd/yue/data/rds/sce_batch_removed.rds")
+
+#tsne plot###############################################################################
+#source("/home/yue/hdd/yue/code/R/Darmanis/clusting.R")
+#sce.normal.somatic@colData@listData[["label"]] <- clusting(sce.normal.somatic)
+#genes.normal <- row.names(logcounts(sce.normal.somatic)) 
+#source("/home/yue/hdd/yue/code/R/Darmanis/dimension_reduction.R")
+#sce.normal.somatic <- dimension.reduction(genes.normal, sce.normal.somatic)
+#plotReducedDim(sce.normal.somatic, dimred="TSNE", colour_by = "SOX4")
+
+#genes.check <- row.names(logcounts(dataList[[11]])) 
+#sce.check <- dimension.reduction(genes.check, dataList[[11]])
+#plotReducedDim(sce.check, dimred="TSNE", colour_by = "SOX4")
+```
+
+
+```{r}
+set.seed(6)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting.R")
+sce.normal.somatic@colData@listData[["label"]] <- clusting(sce.normal.somatic)
+
+source("/home/yue/hdd/yue/code/R/Darmanis/dimension_reduction.R")
+
+genes.somatic <- row.names(counts(sce.normal.somatic))
+
+sce.normal.somatic <- dimension.reduction(genes.somatic, sce.normal.somatic)
+
+plotReducedDim(sce.normal.somatic, dimred="TSNE", colour_by ="TUBB3", point_size=5)+
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 15),
+        legend.key.size = unit(0.8, "cm"))+ 
+  ggsave("/home/yue/hdd/yue/data/output/figures/PROM1/illustration/normal_bcan_tsne.pdf", width = 8,  height = 6)
+```
+
+
+```{r}
+#LOAD DATA#####################################################################################
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing_lib.R")
+source("/home/yue/hdd/yue/code/R/Neftel/pre_processing_Neftel.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data_Neftel.R")
+
+sce <-load.data("/home/yue/hdd/yue/data/CM/Darmanis/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Darmanis/neo_metadata.csv" )
+sceP <-load.data("/home/yue/hdd/yue/data/CM/Patel/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Patel/Patel_meta.csv" )
+sceN <-load.data.Neftel("/home/yue/hdd/yue/data/CM/Neftel/GSM3828672_Smartseq2_GBM_IDHwt_processed_TPM.tsv", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Neftel/meta_Neftel.csv" )
+
+sceN@assays@data@listData[["counts"]]<-sceN@assays@data@listData[["tpm"]]
+sceN <- pre.processing.Neftel(sceN)
+
+sceN@assays@data@listData[["logcounts"]]<-sceN@assays@data@listData[["tpm"]]
+
+###############################################################################################
+```
+
+
+```{r}
+set.seed(6)
+#WITH EACH PATIENT#############################################################################
+#Darmanis
+sce.BT_S2.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S2"))
+sce.BT_S1.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S1"))
+sce.BT_S4.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S4"))
+sce.BT_S6.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S6"))
+
+#Patel
+sce.MGH26.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH26"))
+sce.MGH28.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH28"))
+sce.MGH29.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH29"))
+sce.MGH30.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH30"))
+sce.MGH31.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH31"))
+
+#Neftel
+sce.MGH101.total <- subset(sceN, , tumour.name=="MGH101")
+sce.MGH100.total <- subset(sceN, , tumour.name=="MGH100")
+sce.MGH102.total <- subset(sceN, , tumour.name=="MGH102")
+sce.MGH104.total <- subset(sceN, , tumour.name=="MGH104")
+sce.MGH105.total <- subset(sceN, , tumour.name=="MGH105")
+sce.MGH106.total <- subset(sceN, , tumour.name=="MGH106")
+sce.MGH110.total <- subset(sceN, , tumour.name=="MGH110")
+sce.MGH113.total <- subset(sceN, , tumour.name=="MGH113")
+sce.MGH115.total <- subset(sceN, , tumour.name=="MGH115")
+sce.MGH121.total <- subset(sceN, , tumour.name=="MGH121")
+sce.MGH122.total <- subset(sceN, , tumour.name=="MGH122")
+sce.MGH124.total <- subset(sceN, , tumour.name=="MGH124")
+sce.MGH125.total <- subset(sceN, , tumour.name=="MGH125")
+sce.BT749.total <- subset(sceN, , tumour.name=="BT749")
+sce.BT771.total <- subset(sceN, , tumour.name=="BT771")
+sce.BT830.total <- subset(sceN, , tumour.name=="BT830")
+sce.MGH85.total <- subset(sceN, , tumour.name=="MGH85")
+sce.BT1160.total <- subset(sceN, , tumour.name=="BT1160")
+sce.BT1187.total <- subset(sceN, , tumour.name=="BT1187")
+sce.BT786.total <- subset(sceN, , tumour.name=="BT786")
+sce.BT920.total <- subset(sceN, , tumour.name=="BT920")
+sce.MGH128.total <- subset(sceN, , tumour.name=="MGH128")
+sce.MGH129.total <- subset(sceN, , tumour.name=="MGH129")
+sce.MGH136.total <- subset(sceN, , tumour.name=="MGH136")
+sce.MGH143.total <- subset(sceN, , tumour.name=="MGH143")
+sce.MGH151.total <- subset(sceN, , tumour.name=="MGH151")
+sce.MGH152.total <- subset(sceN, , tumour.name=="MGH152")
+sce.MGH66.total <- subset(sceN, , tumour.name=="MGH66")
+```
+
+
+```{r}
+#Clusting############################################################################
+set.seed(6)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting/clusting_change.R")
+sce.BT_S1.total@colData@listData[["label"]] <- clusting.change(sce.BT_S1.total)
+sce.BT_S2.total@colData@listData[["label"]] <- clusting.change(sce.BT_S2.total)
+
+sce.BT_S4.total@colData@listData[["label"]] <- clusting.change(sce.BT_S4.total)
+sce.BT_S6.total@colData@listData[["label"]] <- clusting.change(sce.BT_S6.total)
+sce.MGH26.total@colData@listData[["label"]] <- clusting.change(sce.MGH26.total)
+sce.MGH28.total@colData@listData[["label"]] <- clusting.change(sce.MGH28.total)
+sce.MGH29.total@colData@listData[["label"]] <- clusting.change(sce.MGH29.total)
+sce.MGH30.total@colData@listData[["label"]] <- clusting.change(sce.MGH30.total)
+sce.MGH31.total@colData@listData[["label"]] <- clusting.change(sce.MGH31.total)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting/clusting_tpm_change.R")
+sce.MGH101.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH101.total)
+sce.MGH100.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH100.total)
+sce.MGH102.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH102.total)
+sce.MGH104.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH104.total)
+sce.MGH105.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH105.total)
+sce.MGH106.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH106.total)
+sce.MGH110.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH110.total)
+sce.MGH113.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH113.total)
+sce.MGH115.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH115.total)
+sce.MGH121.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH121.total)
+sce.MGH122.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH122.total)
+sce.MGH124.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH124.total)
+sce.MGH125.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH125.total)
+sce.BT749.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT749.total)
+sce.BT771.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT771.total)
+sce.BT830.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT830.total)
+sce.MGH85.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH85.total)
+sce.BT1160.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT1160.total)
+sce.BT1187.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT1187.total)
+sce.BT786.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT786.total)
+sce.BT920.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT920.total)
+sce.MGH128.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH128.total)
+sce.MGH129.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH129.total)
+sce.MGH136.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH136.total)
+sce.MGH143.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH143.total)
+sce.MGH151.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH151.total)
+sce.MGH152.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH152.total)
+sce.MGH66.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH66.total)
+rm(sce, sceN, sceP)
+
+```
+
+```{r}
+#Get dataList for all the SingleCellExperiment (Here you need to run the main_PROM1_cluster.r script to the dataList part)
+set.seed(6)
+
+dataList0 <- mget(ls(pattern = '*.total'))
+
+dataList <- dataList0[c("sce.BT_S1.total", "sce.BT_S2.total", "sce.BT_S4.total","sce.BT_S6.total","sce.MGH26.total","sce.MGH28.total",
+                       "sce.MGH29.total","sce.MGH30.total","sce.MGH31.total","sce.BT749.total","sce.BT771.total","sce.BT786.total",                                "sce.BT830.total","sce.BT920.total","sce.BT1160.total","sce.BT1187.total","sce.MGH66.total","sce.MGH85.total",
+                        "sce.MGH100.total","sce.MGH101.total","sce.MGH102.total","sce.MGH104.total","sce.MGH105.total","sce.MGH106.total",
+                        "sce.MGH110.total","sce.MGH113.total","sce.MGH115.total","sce.MGH121.total","sce.MGH122.total","sce.MGH124.total",
+                        "sce.MGH125.total","sce.MGH128.total","sce.MGH129.total","sce.MGH136.total","sce.MGH143.total","sce.MGH151.total",
+                        "sce.MGH152.total")]
+rm(sce.BT_S1.total, sce.BT_S2.total, sce.BT_S4.total, sce.BT_S6.total, sce.MGH26.total, sce.MGH28.total, sce.MGH29.total, sce.MGH30.total, sce.MGH31.total, sce.MGH66.total, sce.MGH85.total, sce.BT1160.total, sce.BT1187.total, sce.BT749.total, sce.BT771.total, sce.BT786.total, sce.BT830.total, sce.BT920.total, sce.MGH100.total, sce.MGH101.total, sce.MGH102.total, sce.MGH104.total, sce.MGH105.total, sce.MGH106.total, sce.MGH110.total, sce.MGH113.total, sce.MGH115.total, sce.MGH121.total, sce.MGH122.total, sce.MGH124.total, sce.MGH125.total, sce.MGH128.total, sce.MGH129.total, sce.MGH136.total, sce.MGH143.total, sce.MGH151.total, sce.MGH152.total)
+
+```
+
+
+```{r}
+#clusting_check
+set.seed(6)
+
+source("/home/yue/hdd/yue/code/R/Darmanis/dimension_reduction.R")
+
+
+#genes.MGH102 <- row.names(counts(sce.MGH102.total))
+
+#sce.MGH102.total <- dimension.reduction(genes.MGH102, sce.MGH102.total)
+
+#plotReducedDim(sce.MGH124.total, dimred="TSNE", colour_by ="ATP1A3", point_size=5)+
+#    theme(axis.title.x = element_blank(),
+#        axis.text.x = element_text(size = 15),
+#        axis.title.y = element_blank(),
+#        axis.text.y = element_text(size = 15),
+#        legend.title = element_blank(),
+#        legend.text = element_text(size = 15),
+#        legend.key.size = unit(0.8, "cm"))+ 
+#  ggsave("/home/yue/hdd/yue/data/output/figures/PROM1/illustration/MGH124_tubb3_tsne.pdf", width = 8,  height = 6)
+
+dataList_tubb3 <- dataList[c(-1,-3, -4, -7,-8,-9)]
+
+for (i in (1:length(dataList_tubb3))){
+  sce.check <- dataList_tubb3[[i]]
+  genes.check <- row.names(counts(sce.check))
+
+  sce.check <- dimension.reduction(genes.check, sce.check)
+
+  plotReducedDim(sce.check, dimred="TSNE", colour_by ="TUBB3", point_size=5)+ 
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 15),
+        legend.key.size = unit(0.8, "cm"))+
+  ggsave(paste("/home/yue/hdd/yue/data/output/figures/PROM1/tsne_tubb3/", names(dataList_tubb3[i]), ".pdf",sep = ""), width = 8,  height = 6)
+}
+
+```
+

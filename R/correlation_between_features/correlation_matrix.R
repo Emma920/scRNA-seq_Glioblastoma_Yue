@@ -1,0 +1,25 @@
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(msigdbr)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(uwot)
+library(Rtsne)
+library(PCAtools)
+library("RColorBrewer")
+library(d3heatmap)
+
+
+correlation.matrix <- function(selected.set1, selected.set2, sce.object) {
+  set1_set2 <- c(selected.set1, selected.set2)
+  set1_set2.counts <- logcounts(sce.object[set1_set2,])
+  matrix.together <- cor(t(set1_set2.counts), method = "pearson") 
+  matrix.set1_set2 <- as.data.frame(matrix.together[selected.set1, selected.set2])  
+  #cormat <- round(cor(csc.counts),2)
+  #round(res, 2)
+  return(matrix.set1_set2)
+}

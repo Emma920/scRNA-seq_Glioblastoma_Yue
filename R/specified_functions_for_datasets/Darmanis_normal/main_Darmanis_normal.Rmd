@@ -1,0 +1,707 @@
+---
+title: "Darmanis_normal_main"
+author: "Yue He"
+date: "11/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '~/hdd/yue')
+library(reticulate)
+use_python("/home/yue/miniconda3/bin/python3", required = TRUE)
+```
+
+
+```{python}
+# This is just a test to see if python is working properly
+import sys
+print(sys.executable)
+import scanpy as sc
+```
+
+
+```{r}
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(msigdbr)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(uwot)
+library(Rtsne)
+library(PCAtools)
+library("RColorBrewer")
+library(d3heatmap)
+library(stringr)
+library(rlist)
+
+```
+
+
+```{r}
+#load_data
+#assign_names <- function(dir1, dir2) {
+#  rawMatrix <- read.table(dir2, header = TRUE)
+#  raw1Matrix <- left_join(geneNames, rawMatrix,  by = c("ensembl_gene_id"="gene_id")) 
+#  cMatrix <- na.omit(raw1Matrix)
+#  countMatrix <- cMatrix[, -1]
+  
+  
+  #aggregate rows that have the same gene names
+  #countMatrix <- aggregate(x = countMatrix[-1], by = list(countMatrix$gene), FUN = sum)
+#  return(countMatrix)
+#}
+#countMatrix_GT_normal <- assign_names("/home/yue/hdd/yue/data/text/gene_name_ERCC.csv", #"/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/countMatrix_Darmanis_normal_combined")
+#write.table(countMatrix_GT_normal, file="/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_normal_combined_CM")
+
+#load data############################################################################
+source("/home/yue/hdd/yue/code/R/ID132/load_data.R")
+sce_Darmanis_normal <-load.data.GT("/home/yue/hdd/yue/data/CM/Darmanis_normal_combined/Darmanis_normal_combined_CM", "/home/yue/hdd/yue/data/text/Darmanis_normal/Darmanis_combined_meta.txt" )
+
+source("/home/yue/hdd/yue/code/R/ID132/pre_processing_lib.R")
+sce.normal.total <- pre.processing.lib(sce_Darmanis_normal)
+
+sce.normal.somatic <- subset(sce.normal.total, , cell_type!="Fetal_quiescent"&cell_type!="Fetal_replicating")
+rm(sce_Darmanis_normal)
+#saveRDS(sce.total, file = "/home/yue/hdd/yue/data/output/rds/sce.total.rds")
+#sce.normal.total <- readRDS("/home/yue/hdd/yue/data/rds/sce_batch_removed.rds")
+
+#tsne plot###############################################################################
+#source("/home/yue/hdd/yue/code/R/Darmanis/clusting.R")
+#sce.normal.somatic@colData@listData[["label"]] <- clusting(sce.normal.somatic)
+#genes.normal <- row.names(logcounts(sce.normal.somatic)) 
+#source("/home/yue/hdd/yue/code/R/Darmanis/dimension_reduction.R")
+#sce.normal.somatic <- dimension.reduction(genes.normal, sce.normal.somatic)
+#plotReducedDim(sce.normal.somatic, dimred="TSNE", colour_by = "SOX4")
+
+#genes.check <- row.names(logcounts(dataList[[11]])) 
+#sce.check <- dimension.reduction(genes.check, dataList[[11]])
+#plotReducedDim(sce.check, dimred="TSNE", colour_by = "SOX4")
+```
+
+```{r}
+#Remove batch effect pseudo count= 1, and par.prior=FALSE#######################################################################
+library(sva)
+pheno <- colData(sce.normal.total)
+batch <- pheno$SRA.Study
+modcombat <- model.matrix(~cell_type, data=pheno)
+combat_edata <- ComBat(dat=logcounts(sce.normal.total), batch=batch, mod=modcombat, par.prior=FALSE, prior.plots=FALSE)
+write.table(combat_edata, file="/home/yue/hdd/yue/data/output/figures/PROM1/Darmanis_normal_combined/batch_eliminated_parFALSE_noMeanSET")
+test <- read.table("/home/yue/hdd/yue/data/output/figures/PROM1/Darmanis_normal_combined/batch_eliminated_parFALSE_noMeanSET")
+```
+
+```{r}
+#Remove batch effect pseudo count= 1, and par.prior=FALSE#######################################################################
+library(sva)
+pheno <- colData(sce.normal.total)
+batch <- pheno$SRA.Study
+modcombat <- model.matrix(~cell_type, data=pheno)
+combat_edata_psedo <- ComBat(dat=logcounts(sce.normal.total), batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=FALSE)
+
+```
+
+```{r}
+#LOAD DATA#####################################################################################
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/pre_processing_lib.R")
+source("/home/yue/hdd/yue/code/R/Neftel/pre_processing_Neftel.R")
+source("/home/yue/hdd/yue/code/R/Darmanis/load_data_Neftel.R")
+
+sce <-load.data("/home/yue/hdd/yue/data/CM/Darmanis/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Darmanis/neo_metadata.csv" )
+sceP <-load.data("/home/yue/hdd/yue/data/CM/Patel/countMatrix_S", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Patel/Patel_meta.csv" )
+sceN <-load.data.Neftel("/home/yue/hdd/yue/data/CM/Neftel/GSM3828672_Smartseq2_GBM_IDHwt_processed_TPM.tsv", "/home/yue/hdd/yue/data/text/ncbi_Acc_list/Neftel/meta_Neftel.csv" )
+
+sceN@assays@data@listData[["counts"]]<-sceN@assays@data@listData[["tpm"]]
+sceN <- pre.processing.Neftel(sceN)
+
+sceN@assays@data@listData[["logcounts"]]<-sceN@assays@data@listData[["tpm"]]
+
+###############################################################################################
+```
+
+```{r}
+set.seed(6)
+#WITH EACH PATIENT#############################################################################
+#Darmanis
+sce.BT_S2.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S2"))
+sce.BT_S1.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S1"))
+sce.BT_S4.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S4"))
+sce.BT_S6.total <- pre.processing.lib(subset(sce, , patient_id=="BT_S6"))
+
+#Patel
+sce.MGH26.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH26"))
+sce.MGH28.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH28"))
+sce.MGH29.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH29"))
+sce.MGH30.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH30"))
+sce.MGH31.total <- pre.processing.lib(subset(sceP, , patient_id=="MGH31"))
+
+#Neftel
+sce.MGH101.total <- subset(sceN, , tumour.name=="MGH101")
+sce.MGH100.total <- subset(sceN, , tumour.name=="MGH100")
+sce.MGH102.total <- subset(sceN, , tumour.name=="MGH102")
+sce.MGH104.total <- subset(sceN, , tumour.name=="MGH104")
+sce.MGH105.total <- subset(sceN, , tumour.name=="MGH105")
+sce.MGH106.total <- subset(sceN, , tumour.name=="MGH106")
+sce.MGH110.total <- subset(sceN, , tumour.name=="MGH110")
+sce.MGH113.total <- subset(sceN, , tumour.name=="MGH113")
+sce.MGH115.total <- subset(sceN, , tumour.name=="MGH115")
+sce.MGH121.total <- subset(sceN, , tumour.name=="MGH121")
+sce.MGH122.total <- subset(sceN, , tumour.name=="MGH122")
+sce.MGH124.total <- subset(sceN, , tumour.name=="MGH124")
+sce.MGH125.total <- subset(sceN, , tumour.name=="MGH125")
+sce.BT749.total <- subset(sceN, , tumour.name=="BT749")
+sce.BT771.total <- subset(sceN, , tumour.name=="BT771")
+sce.BT830.total <- subset(sceN, , tumour.name=="BT830")
+sce.MGH85.total <- subset(sceN, , tumour.name=="MGH85")
+sce.BT1160.total <- subset(sceN, , tumour.name=="BT1160")
+sce.BT1187.total <- subset(sceN, , tumour.name=="BT1187")
+sce.BT786.total <- subset(sceN, , tumour.name=="BT786")
+sce.BT920.total <- subset(sceN, , tumour.name=="BT920")
+sce.MGH128.total <- subset(sceN, , tumour.name=="MGH128")
+sce.MGH129.total <- subset(sceN, , tumour.name=="MGH129")
+sce.MGH136.total <- subset(sceN, , tumour.name=="MGH136")
+sce.MGH143.total <- subset(sceN, , tumour.name=="MGH143")
+sce.MGH151.total <- subset(sceN, , tumour.name=="MGH151")
+sce.MGH152.total <- subset(sceN, , tumour.name=="MGH152")
+sce.MGH66.total <- subset(sceN, , tumour.name=="MGH66")
+```
+
+```{r}
+#Clusting############################################################################
+set.seed(6)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting/clusting_change.R")
+sce.BT_S1.total@colData@listData[["label"]] <- clusting.change(sce.BT_S1.total)
+sce.BT_S2.total@colData@listData[["label"]] <- clusting.change(sce.BT_S2.total)
+
+sce.BT_S4.total@colData@listData[["label"]] <- clusting.change(sce.BT_S4.total)
+sce.BT_S6.total@colData@listData[["label"]] <- clusting.change(sce.BT_S6.total)
+sce.MGH26.total@colData@listData[["label"]] <- clusting.change(sce.MGH26.total)
+sce.MGH28.total@colData@listData[["label"]] <- clusting.change(sce.MGH28.total)
+sce.MGH29.total@colData@listData[["label"]] <- clusting.change(sce.MGH29.total)
+sce.MGH30.total@colData@listData[["label"]] <- clusting.change(sce.MGH30.total)
+sce.MGH31.total@colData@listData[["label"]] <- clusting.change(sce.MGH31.total)
+source("/home/yue/hdd/yue/code/R/Darmanis/clusting/clusting_tpm_change.R")
+sce.MGH101.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH101.total)
+sce.MGH100.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH100.total)
+sce.MGH102.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH102.total)
+sce.MGH104.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH104.total)
+sce.MGH105.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH105.total)
+sce.MGH106.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH106.total)
+sce.MGH110.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH110.total)
+sce.MGH113.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH113.total)
+sce.MGH115.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH115.total)
+sce.MGH121.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH121.total)
+sce.MGH122.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH122.total)
+sce.MGH124.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH124.total)
+sce.MGH125.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH125.total)
+sce.BT749.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT749.total)
+sce.BT771.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT771.total)
+sce.BT830.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT830.total)
+sce.MGH85.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH85.total)
+sce.BT1160.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT1160.total)
+sce.BT1187.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT1187.total)
+sce.BT786.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT786.total)
+sce.BT920.total@colData@listData[["label"]] <- clusting.tpm.change(sce.BT920.total)
+sce.MGH128.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH128.total)
+sce.MGH129.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH129.total)
+sce.MGH136.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH136.total)
+sce.MGH143.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH143.total)
+sce.MGH151.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH151.total)
+sce.MGH152.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH152.total)
+sce.MGH66.total@colData@listData[["label"]] <- clusting.tpm.change(sce.MGH66.total)
+
+rm(sce, sceN, sceP)
+
+```
+
+```{r}
+#Get dataList for all the SingleCellExperiment (Here you need to run the main_PROM1_cluster.r script to the dataList part)
+set.seed(6)
+
+dataList0 <- mget(ls(pattern = '*.total'))
+
+dataList <- dataList0[c("sce.BT_S1.total", "sce.BT_S2.total", "sce.BT_S4.total","sce.BT_S6.total","sce.MGH26.total","sce.MGH28.total",
+                       "sce.MGH29.total","sce.MGH30.total","sce.MGH31.total","sce.BT749.total","sce.BT771.total","sce.BT786.total",                                "sce.BT830.total","sce.BT920.total","sce.BT1160.total","sce.BT1187.total","sce.MGH66.total","sce.MGH85.total",
+                        "sce.MGH100.total","sce.MGH101.total","sce.MGH102.total","sce.MGH104.total","sce.MGH105.total","sce.MGH106.total",
+                        "sce.MGH110.total","sce.MGH113.total","sce.MGH115.total","sce.MGH121.total","sce.MGH122.total","sce.MGH124.total",
+                        "sce.MGH125.total","sce.MGH128.total","sce.MGH129.total","sce.MGH136.total","sce.MGH143.total","sce.MGH151.total",
+                        "sce.MGH152.total")]
+rm(sce.BT_S1.total, sce.BT_S2.total, sce.BT_S4.total, sce.BT_S6.total, sce.MGH26.total, sce.MGH28.total, sce.MGH29.total, sce.MGH30.total, sce.MGH31.total, sce.MGH66.total, sce.MGH85.total, sce.BT1160.total, sce.BT1187.total, sce.BT749.total, sce.BT771.total, sce.BT786.total, sce.BT830.total, sce.BT920.total, sce.MGH100.total, sce.MGH101.total, sce.MGH102.total, sce.MGH104.total, sce.MGH105.total, sce.MGH106.total, sce.MGH110.total, sce.MGH113.total, sce.MGH115.total, sce.MGH121.total, sce.MGH122.total, sce.MGH124.total, sce.MGH125.total, sce.MGH128.total, sce.MGH129.total, sce.MGH136.total, sce.MGH143.total, sce.MGH151.total, sce.MGH152.total)
+
+```
+
+
+```{r}
+#Calculate ranks#################################################################
+set.seed(6)
+
+ranks.per.gene <- function(x) {
+  y <- frank(replace(x,x==0,NA), ties.method = "average", na.last = "keep")*100/sum(x!=0)
+  rownames(y)<- rownames(x)
+  return(y)
+}
+
+
+for (i in 1:length(dataList)){
+  
+  dataList[[i]]@assays@data@listData[["ranks"]]<-apply(logcounts(dataList[[i]]), 2, ranks.per.gene)
+  rownames(dataList[[i]]@assays@data@listData[["ranks"]]) <- rownames(logcounts(dataList[[i]]))
+}
+
+#length(which(is.na(x["PROM1"])))*100/nrow(x)
+
+```
+
+
+
+
+```{r}
+###################################################################################
+#Calculate percentages-percentageRank of all cancer patients' cells with selected genes 
+set.seed(6)
+
+stem.clusters <- list(BT771_4 = subset(dataList[["sce.BT771.total"]], , label=="4"), 
+BT771_5 = subset(dataList[["sce.BT771.total"]], , label=="5"), 
+BT830_1 = subset(dataList[["sce.BT830.total"]], , label=="1"),
+BT920_2 = subset(dataList[["sce.BT920.total"]], , label=="2"), 
+BT_S1_2 = subset(dataList[["sce.BT_S1.total"]], , label=="2"),
+BT_S2_2 = subset(dataList[["sce.BT_S2.total"]], , label=="2"), 
+MGH66_4 = subset(dataList[["sce.MGH66.total"]], , label=="4"),
+MGH100_2 = subset(dataList[["sce.MGH100.total"]], , label=="2"), 
+MGH101_2 = subset(dataList[["sce.MGH101.total"]], , label=="2"),
+MGH102_1 = subset(dataList[["sce.MGH102.total"]], , label=="1"), 
+MGH102_2 = subset(dataList[["sce.MGH102.total"]], , label=="2"),
+MGH105_2 = subset(dataList[["sce.MGH105.total"]], , label=="2"),
+MGH106_1 = subset(dataList[["sce.MGH106.total"]], , label=="1"),
+MGH110_4 = subset(dataList[["sce.MGH110.total"]], , label=="4"),
+MGH113_1 = subset(dataList[["sce.MGH113.total"]], , label=="1"), 
+MGH115_1 = subset(dataList[["sce.MGH115.total"]], , label=="1"),
+MGH121_1 = subset(dataList[["sce.MGH121.total"]], , label=="1"),
+MGH122_3 = subset(dataList[["sce.MGH122.total"]], , label=="3"), 
+MGH122_4 = subset(dataList[["sce.MGH122.total"]], , label=="4"),
+MGH124_1 = subset(dataList[["sce.MGH124.total"]], , label=="1"), 
+MGH124_2 = subset(dataList[["sce.MGH124.total"]], , label=="2"),
+MGH125_2 = subset(dataList[["sce.MGH125.total"]], , label=="2"), 
+MGH125_4 = subset(dataList[["sce.MGH125.total"]], , label=="4"), 
+MGH129_3 = subset(dataList[["sce.MGH129.total"]], , label=="3"), 
+MGH136_1 = subset(dataList[["sce.MGH136.total"]], , label=="1"),
+MGH136_3 = subset(dataList[["sce.MGH136.total"]], , label=="3"), 
+MGH143_2 = subset(dataList[["sce.MGH143.total"]], , label=="2"), 
+MGH151_2 = subset(dataList[["sce.MGH151.total"]], , label=="2"))
+```
+
+```{r}
+#load stem-like marker genes
+set.seed(6)
+all.stem.genes <- read.table("/home/yue/hdd/yue/data/output/figures/PROM1/all.stem.genes")
+all.stem.genes["frequencies"] <- all.stem.genes["frequencies"]*100/35
+selected.stem.genes <- subset(all.stem.genes, frequencies > 10&pval_rank_median<50)
+selected.stem.names <- as.character(selected.stem.genes$names)
+selected2.0_genes <- selected.stem.names[! selected.stem.names %in% c("C8orf46", "FAM115A", "GPR56", "HMP19", "LPPR1", "MAGED4B", "MLLT4", "NGFRAP1", "PTCHD2","SEPT7")]
+
+```
+
+```{r}
+#Calculate ranks for normal cells
+
+sce.normal.somatic@assays@data@listData[["ranks"]]<-apply(logcounts(sce.normal.somatic), 2, ranks.per.gene)
+rownames(sce.normal.somatic@assays@data@listData[["ranks"]]) <- rownames(logcounts(sce.normal.somatic))
+
+
+```
+
+
+```{r}
+#Filter after the first selection figure with comparing with normal cells
+selected2.0_ranks_cancer <- list()
+for (i in 1:length(selected2.0_genes)){
+  cancer_ranks <- data.frame()
+
+  for (j in 1: length(stem.clusters)){
+        if (selected2.0_genes[i] %in% rownames(logcounts(stem.clusters[[j]]))){
+           c1 <- data.frame(gene= stem.clusters[[j]]@assays@data@listData[["ranks"]][selected2.0_genes[i],],   patient_ID=names(stem.clusters[j]), tissue_type = "cancer")
+           cancer_ranks <- rbind(cancer_ranks, c1)
+           #names(markers.clusters)[j]<-  j
+        }
+
+  }
+   selected2.0_ranks_cancer <- list.append(selected2.0_ranks_cancer, cancer_ranks)
+   names(selected2.0_ranks_cancer)[i]<-  selected2.0_genes[i]
+}
+
+
+selected2.0_ranks_normal <- list()
+for (i in 1:length(selected2.0_genes)){
+  normal_ranks <- data.frame()
+  
+  if (selected2.0_genes[i] %in% rownames(logcounts(sce.normal.somatic))){
+           c1 <- data.frame(gene= sce.normal.somatic@assays@data@listData[["ranks"]][selected2.0_genes[i],],   patient_ID="normal", tissue_type = "cancer")
+           normal_ranks <- rbind(normal_ranks, c1)
+           #names(markers.clusters)[j]<-  j
+        }
+
+   selected2.0_ranks_normal <- list.append(selected2.0_ranks_normal, normal_ranks)
+   names(selected2.0_ranks_normal)[i]<-  selected2.0_genes[i]
+}
+
+###################################################################################
+#selected2.0_abundance_cancer <- data.frame()
+#for (i in 1:length(selected2.0_genes)){
+#  cancer_abundance <- data.frame()
+#  c1 <- selected2.0_ranks_cancer[[selected2.0_genes[i]]]$gene
+#  p1 <- data.frame(non_zero_percentages=100-length(which(is.na(c1)))*100/length(c1), gene=rownames(selected2.0_genes[i])
+#  selected2.0_abundance_cancer <- rbind(selected2.0_abundance_cancer, p1)
+#}
+
+
+#selected2.0_abundance_normal <- list()
+#for (i in 1:length(selected2.0_genes)){
+#  normal_abundance <- data.frame()
+  
+#  if (selected2.0_genes[i] %in% rownames(logcounts(sce.normal.somatic))){
+#           c1 <- data.frame(gene= sce.normal.somatic@assays@data@listData[["ranks"]][selected2.0_genes[i],], # patient_ID="normal", tissue_type = "cancer")
+#          p1 <- data.frame(non_zero_percentages=100-length(which(is.na(c1["gene"])))*100/nrow(c1), #patient_ID=str_sub(names(dataList[j]), 5, -7))
+#           normal_abundance <- rbind(normal_abundance, p1)
+           #names(markers.clusters)[j]<-  j
+#        }
+
+#   selected2.0_abundance_normal <- list.append(selected2.0_abundance_normal, normal_abundance)
+#   names(selected2.0_abundance_normal)[i]<-  selected2.0_genes[i]
+#}
+
+DEGs_excluded_selected2 <- c("C8orf46", "FAM115A", "GPR56", "HMP19", "LPPR1", "MAGED4B", "MLLT4", "NGFRAP1", "PTCHD2", "SEPT7")
+
+library(gtools)
+#test <- foldchange(selected2.0_ranks_cancer[["ABAT"]][["gene"]], selected2.0_ranks_normal[["ABAT"]][["gene"]])
+
+selected_compare <- data.frame()
+for (i in 1:length(selected2.0_genes)){
+  test1 <- na.omit(selected2.0_ranks_cancer[[selected2.0_genes[i]]])
+  test2 <- na.omit(selected2.0_ranks_normal[[selected2.0_genes[i]]])
+  test3 <- wilcox.test(test1$gene, test2$gene)
+  #test4 <- selected2.0_abundance_cancer$non_zero_percentages[which(selected2.0_abundance_cancer$gene==selected.stem.names[i])]
+  #test5 <- selected2.0_abundance_normal[[selected2.0_genes[i]]]
+  c1 <- data.frame(gene_name=selected2.0_genes[i], cancer_median_ranks=median(test1$gene), normal_median_ranks=median(test2$gene), wilcoxon_p=test3[["p.value"]])
+                   #, cancer_median_abundance =test4, normal_abundance = median(test5$non_zero_percentages) )
+  selected_compare <- rbind(selected_compare,c1)
+}
+selected_compare$normal_cancer_median_ranks_logFC <- log2(selected_compare$cancer_median_ranks)-log2(selected_compare$normal_median_ranks)
+
+
+
+select_cancer_more <- selected_compare[which(selected_compare$cancer_median_ranks>selected_compare$normal_median_ranks&selected_compare$wilcoxon_p<0.05), ]
+
+#select_cancer_more$normal_cancer_median_ranks_logFC <- log2(select_cancer_more$cancer_median_ranks)-log2(select_cancer_more$normal_median_ranks)
+```
+
+
+```{r}
+library(EnhancedVolcano)
+
+EnhancedVolcano(selected_compare,
+    lab = selected_compare$gene_name,
+    #selectLab = c('SNX22'),
+    x = 'normal_cancer_median_ranks_logFC',
+    y = 'wilcoxon_p',
+    xlab = bquote(~Log[2]~ 'fold change'),
+    col=c("black", '#1f78b4', '#33a02c', 'orange1'),
+    pCutoff = 0.001,
+    FCcutoff = 0.8,
+    pointSize = 1,#c(ifelse(test$names=="PROM1", 8, 1)),
+    labSize = 6.0,
+    colAlpha = 1,
+    legendPosition = 'right',
+    legendLabSize = 12,
+    legendIconSize = 4.0,
+    drawConnectors = TRUE,
+    widthConnectors = 0.75,
+    legendVisible = FALSE)+
+  ggplot2::ggsave("/home/yue/hdd/yue/data/output/figures/PROM1/selected2_volcano.pdf", width = 8,   height = 6)
+
+
+set.seed(6)
+library(EnhancedVolcano)
+EnhancedVolcano(selected_compare,
+  lab = selected_compare$gene_name,
+  x = 'normal_cancer_median_ranks_logFC',
+  y = 'wilcoxon_p',
+  col=c("black", '#1f78b4', '#33a02c', 'orange1'),
+  pCutoff = 0.001,
+  FCcutoff = 0.5,
+  pointSize = 4,
+  colAlpha = 1,
+  drawConnectors = TRUE,
+  legendVisible = FALSE)+
+  ggplot2::theme(axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      plot.title = element_blank(),
+      legend.text = element_blank(),
+      title = element_blank(),
+      plot.subtitle = element_blank(),
+      plot.caption = element_blank())+
+  ggplot2::ggsave("/home/yue/hdd/yue/data/output/figures/PROM1/selected2.1_volcano.pdf", width = 8,   height = 6)
+
+```
+
+
+
+```{r}
+#Plot DEGs on frequency selection1 plot
+DEGs_up_selected2 <- c("LDHB", "RCN1", "PTPRS", "METTL7B", "UHRF1", "ATP1A3", "TUBB3", "MAGED4")
+DEGs_up2_selected2 <- c("MDK", "MEST", "HEPN1", "NNAT", "MCM7", 
+                        "CDK4", "TMSB15A", "RBP1", "NOVA1", "SOX4",
+                        "LIMA1", "DLX5", "DBN1", "ARL4D", "ETV1",
+                        "NFIX", "ASIC4", "ITGA7", "KLHDC8A", "SOX11")
+DEGs_excluded_selected2 <- c("C8orf46", "FAM115A", "GPR56", "HMP19", "LPPR1", "MAGED4B", "MLLT4", "NGFRAP1", "PTCHD2", "SEPT7")
+DEGs_all <- c(DEGs_up_selected2, DEGs_up2_selected2, DEGs_excluded_selected2)
+membrane <- c("GPM6A","PTPRZ1","PTPRS","FXYD6","SEMA5A","GPR56","SEZ6L","ATP1B2","PCDHGC3","DDR1","ATP1A2","DSEL","GPM6B","DLL3","ITGB8","TTYH1","TSPAN7","LHFPL3","SCD5","NLGN3","NCAM1","CSPG4","GPR37L1","LRRN1","ATP1A3","NKAIN4","NOTCH1","PDGFRA","TSPAN3","CADM2","SDC3","SLC1A2","RAMP1","DSCAM","GRIA2","DTNA","ASIC4","CELSR3","ITM2C","MLC1","SLC38A1","HEPACAM","EGFR","DLL1","PCDH9","PLP1","ATP13A4","FZD3","GRIA3","SEZ6","CALCRL","SLC1A3","AQP4","KCNH7","DCHS1","GPR17","LAPTM4B","NSG1","SERINC5","KCNJ10","PLXNB3","NTRK2","LRP1","ROBO1","SCN3B","ALCAM","CRB1","CNR1","CMTM5","LPPR1","THSD7A","HMP19","ITGA7","KIDINS220","PTCHD2")
+DEGs_membrane_intersect <- intersect(DEGs_all, membrane)
+DEGs_up_membran_intersect <- intersect(DEGs_up_selected2, membrane)
+DEGs_up2_membran_intersect <- intersect(DEGs_up2_selected2, membrane)
+DEGs_excluded_membran_intersect <- intersect(DEGs_excluded_selected2, membrane)
+
+
+
+#  geom_text_repel(data=all.stem.genes %>% filter(names %in% DEGs_up_selected2), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+#  geom_text_repel(data=all.stem.genes %>% filter(names %in% DEGs_up2_selected2), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  #geom_text_repel(data=subset(stem.DEG.all, !is.na(stem.DEG.all$frequencies_intersect)&stem.DEG.all$frequencies>10&stem.DEG.all$pval_rank_median<50), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names)) +
+#  geom_text_repel(data=all.stem.genes %>% filter(names %in% membrane), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+#  geom_point(data=all.stem.genes %>% filter(names %in% DEGs_up_selected2), aes(pval_rank_median, frequencies),  shape=16, size=4, color="#ffa500ff")+
+#  geom_point(data=all.stem.genes %>% filter(names %in% DEGs_up2_selected2), aes(pval_rank_median, frequencies),  shape=16, size=4, color="#a05a2cff")+
+ggplot()+
+#  geom_text_repel(data=all.stem.genes %>% filter(names %in% membrane), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  geom_point(data=all.stem.genes, aes(x=pval_rank_median,y=frequencies), , alpha = 0.2) +
+  scale_size_continuous(range = c(4,10))+  
+  geom_text_repel(data=all.stem.genes %>% filter(names %in% DEGs_up_membran_intersect), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  geom_text_repel(data=all.stem.genes %>% filter(names %in% DEGs_up2_membran_intersect), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  geom_text_repel(data=all.stem.genes %>% filter(names %in% DEGs_excluded_membran_intersect), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  geom_point(data=all.stem.genes %>% filter(names %in% DEGs_up_membran_intersect), aes(pval_rank_median, frequencies),  shape=16, size=4, color="#ffa500ff")+
+  geom_point(data=all.stem.genes %>% filter(names %in% DEGs_up2_membran_intersect), aes(pval_rank_median, frequencies),  shape=16, size=4, color="#a05a2cff")+    
+  geom_point(data=all.stem.genes %>% filter(names %in% DEGs_excluded_membran_intersect), aes(pval_rank_median, frequencies),  shape=4, size=4, color="red")+
+  geom_point(data=all.stem.genes %>% filter(names %in% DEGs_membrane_intersect), aes(pval_rank_median, frequencies),  shape=2, size=5, color="black")+
+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+
+  ggsave(paste("/home/yue/hdd/yue/data/output/figures/PROM1/membrane_DEG.pdf"), width = 8,  height = 6)
+
+#find_markers_DEG_selection2_last
+ggplot() +
+  geom_point(data=all.stem.genes, aes(x=pval_rank_median,y=frequencies), , alpha = 0.2) +
+  scale_size_continuous(range = c(4,10))+
+  geom_text_repel(data=all.stem.genes %>% filter(names %in% DEGs_excluded_selected2), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+
+  #geom_text_repel(data=subset(stem.DEG.all, !is.na(stem.DEG.all$frequencies_intersect)&stem.DEG.all$frequencies>10&stem.DEG.all$pval_rank_median<50), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names)) +
+  geom_point(data=all.stem.genes %>% filter(names %in% DEGs_excluded_selected2), aes(pval_rank_median, frequencies),  shape=4, size=4, color="red")+
+  theme_minimal()+
+    theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+
+  ggsave("/home/yue/hdd/yue/data/output/figures/PROM1/find_markers_DEG_selection2_excluded.pdf", width = 8,  height = 6)
+```
+
+
+
+
+
+
+```{r}
+#selection with logFC and percentage-rank
+set.seed(6)
+
+
+library(rlist)
+selected_ranks <- list()
+for (i in 1:(length(selected.stem.names))){
+  ranks <- data.frame()
+  for (j in 1: length(stem.clusters)){
+    if (selected.stem.names[i] %in% rownames(logcounts(stem.clusters[[j]]))){
+      c1 <- data.frame(gene= stem.clusters[[j]]@assays@data@listData[["ranks"]][selected.stem.names[i],], patient_ID=names(stem.clusters[j]))
+    ranks <- rbind(ranks, c1)
+    }
+    
+  }
+  selected_ranks <- list.append(selected_ranks, ranks)
+  names(selected_ranks)[i]<-  selected.stem.names[i]
+}
+
+
+selected_logFC <- list()
+for (i in 1:(length(selected.stem.names))){
+  #print(i)
+  logFC <- data.frame()
+  for (j in 1:length(markers.stem)){
+    if (selected.stem.names[i] %in% markers.stem[[j]]$names){
+      c1 <- data.frame(logFC= markers.stem[[j]][which(markers.stem[[j]]$names==selected.stem.names[i]), "logfoldchanges"], patient_ID=names(markers.stem[j]))
+    logFC <- rbind(logFC, c1)
+    }
+  }
+  selected_logFC <- list.append(selected_logFC, logFC)
+  names(selected_logFC)[i]<-  selected.stem.names[i]
+}
+
+selected_list <- data.frame()
+for (i in (1:length(selected_ranks))){
+  x <- data.frame(rank_median=median(na.omit(selected_ranks[[i]]$gene)), logFC_median = median(selected_logFC[[i]]$logFC))
+  selected_list <- rbind(selected_list, x)
+  rownames(selected_list)[i] <-  names(selected_ranks[i])
+}
+selected_list$names <- rownames(selected_list)
+```
+
+
+```{r}
+
+ggplot() +
+  geom_point(data=selected_list, aes(rank_median, logFC_median), alpha = 2/3) +
+  #geom_text_repel(data=selected_list, box.padding = unit(1, 'lines'), aes(rank_median, logFC_median,label=rownames(selected_list)))+
+  geom_text_repel(data=subset(selected_list, logFC_median > 5), box.padding = unit(1, 'lines'),                   aes(rank_median,logFC_median,label=names))+
+  theme_minimal()+
+  ggsave(paste("/home/yue/hdd/yue/data/output/figures/PROM1/find_markers_logFC_ranks.pdf"), width = 8,  height = 6)
+
+selected_box_genes <- as.character(subset(all.stem.genes, frequencies > 35&pval_rank_median<50)$names)
+DEGs_excluded_selected2 <- c("C8orf46", "FAM115A", "GPR56", "HMP19", "LPPR1", "MAGED4B", "MLLT4", "NGFRAP1", "PTCHD2", "SEPT7")
+DEGs_up_selected2 <- c("LDHB", "RCN1", "PTPRS", "METTL7B", "UHRF1", "ATP1A3", "TUBB3", "MAGED4")
+DEGs_up2_selected2 <- c("MDK", "MEST", "HEPN1", "NNAT", "MCM7", 
+                        "CDK4", "TMSB15A", "RBP1", "NOVA1", "SOX4",
+                        "LIMA1", "DLX5", "DBN1", "ARL4D", "ETV1",
+                        "NFIX", "ASIC4", "ITGA7", "KLHDC8A", "SOX11")
+
+ggplot() +
+  geom_point(data=selected_list, aes(rank_median, logFC_median), , alpha = 0.2) +
+  scale_size_continuous(range = c(4,10))+
+#  geom_text_repel(data=selected_list %>% filter(names %in% DEGs_up_selected2), box.padding = unit(2, 'lines'),                         aes(rank_median, logFC_median,label=names))+
+#  geom_text_repel(data=selected_list %>% filter(names %in% DEGs_up2_selected2), box.padding = unit(1, 'lines'),                        aes(rank_median, logFC_median,label=names))+
+#  geom_text_repel(data=selected_list %>% filter(names %in% DEGs_excluded_selected2), box.padding = unit(2, 'lines'),                   aes(rank_median, logFC_median,label=names))+
+  #geom_text_repel(data=selected_list %>% filter(names %in% selected_box_genes), box.padding = unit(3, 'lines'),                        aes(rank_median, logFC_median,label=names))+
+#  geom_point(data=selected_list %>% filter(names %in% DEGs_up_selected2), aes(rank_median, logFC_median),  shape=16, size=4, color="#ffa500ff")+
+#  geom_point(data=selected_list %>% filter(names %in% DEGs_up2_selected2), aes(rank_median, logFC_median),  shape=16, size=4, color="#a05a2cff")+
+#  geom_point(data=selected_list %>% filter(names %in% DEGs_excluded_selected2), aes(rank_median, logFC_median),  shape=4, size=4, color="red")+
+  geom_text_repel(data=all.stem.genes %>% filter(names %in% membrane), box.padding = unit(1, 'lines'),                   aes(pval_rank_median,frequencies,label=names))+  
+  geom_point(data=all.stem.genes %>% filter(names %in% membrane), aes(pval_rank_median, frequencies),  shape=2, size=5, color="black")+
+  theme_minimal()+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 20),
+        plot.title = element_text(hjust = 0.5,size=40),
+        aspect.ratio = 0.618)+
+  ggsave(paste("/home/yue/hdd/yue/data/output/figures/PROM1/level_membrane.pdf"), width = 8,  height = 6)
+
+
+```
+
+
+
+
+
+```{r}
+####################################abundance versus percentage-rank of all cancer cells
+#selected_genes <- c("BCAN", "SOX4", "GPM6A", "SOX2-OT", "S100B", "PTPRZ1", "SOX11","MAP2","TUBB2B", "NREP", "NCAM1", "SPARC",  "TNR",   "ITM2C", "GRIA2",  "SERPINE2", "NDRG2",  "MTSS1",  "SPP1", "AQP4", "GPM6B", "TUBA1A", "CNP")
+#"APOD"c(-7) "MBP" c(-1,-6) "BCAS1" c(-1,-3,-4) "EDIL3" c(-1,-2,-3,-4) "CA10" c(-2,-3,-6,-7) "GPR17" c(-2,-3,-6,-7,-9) "NKAIN4" c(-3,-5,-6,-9) "TUBB4A" c(-3) "ATCAY" c(-3,-7)"SMOC1" c(-6,-7) "SPOCK1" c(-7), "MEG3" c(-7), "PTPRS" c(-6,-7) , "OLIG1" c(-6,-7) , "TUBB3" c(-1,-3,-7,-8,-9), "DBN1" c(-6)
+
+#selected_ranks <- list()
+#for (i in 1:(length(selected_genes))){
+#  library(rlist)
+#  ranks <- data.frame()
+#  for (j in 1: length(dataList)){
+#    c1 <- data.frame(gene= dataList[[j]]@assays@data@listData[["ranks"]][selected_genes[i],], patient_ID=names(dataList[j]))
+#    ranks <- rbind(ranks, c1)
+    #names(markers.clusters)[j]<-  j
+#  }
+#  selected_ranks <- list.append(selected_ranks, ranks)
+#  names(selected_ranks)[i]<-  selected_genes[i]
+#}
+
+#ranks <- data.frame()
+#for (j in 1: length(dataList[c(-6)])){
+#  c1 <- data.frame(gene= dataList[c(-6)][[j]]@assays@data@listData[["ranks"]]["DBN1",], patient_ID=str_sub(names(dataList[c(-6)][j]), 5, -7))
+#  ranks <- rbind(ranks, c1)
+
+#  }
+#selected_ranks <- list.append(selected_ranks, ranks)
+#names(selected_ranks)[length(selected_ranks)]<-  "DBN1"
+
+
+#selected_percentages <- list()
+#for (i in 1:(length(selected_genes))){
+#  library(rlist)
+#  percentages <- data.frame()
+#  for (j in 1: length(dataList)){
+#    c1 <- data.frame(gene= dataList[[j]]@assays@data@listData[["ranks"]][selected_genes[i],], patient_ID=str_sub(names(dataList[j]), 5, -7))
+#    p1 <- data.frame(non_zero_percentages=100-length(which(is.na(c1["gene"])))*100/nrow(c1), patient_ID=str_sub(names(dataList[j]), 5, -7))
+#    percentages <- rbind(percentages, p1)
+    #names(markers.clusters)[j]<-  j
+#  }
+#  selected_percentages <- list.append(selected_percentages, percentages)
+#  names(selected_percentages)[i]<-  selected_genes[i]
+#}
+
+#percentages <- data.frame()
+#for (j in 1: length(dataList[c(-6)])){
+#    c1 <- data.frame(gene= dataList[c(-6)][[j]]@assays@data@listData[["ranks"]]["DBN1",], patient_ID=str_sub(names(dataList[c(-6)][j]), 5, -7))
+#    p1 <- data.frame(non_zero_percentages=100-length(which(is.na(c1["gene"])))*100/nrow(c1), patient_ID=str_sub(names(dataList[c(-6)][j]), 5, -7))
+#    percentages <- rbind(percentages, p1)
+
+#  }
+#selected_percentages <- list.append(selected_percentages, percentages)
+#names(selected_percentages)[length(selected_percentages)]<-  "DBN1"
+
+
+
+
+#selected_list <- data.frame()
+#for (i in (1:length(selected_ranks))){
+#  x <- data.frame(rank_median=median(na.omit(selected_ranks[[i]]$gene)), percentage_median = median(selected_percentages[[i]]$non_zero_percentages))
+#  selected_list <- rbind(selected_list, x)
+#  rownames(selected_list)[i] <-  names(selected_ranks[i])
+#}
+```
+
+
+
+
+################################################################################################
+################################################################################################
+################################################################################################
+
+
